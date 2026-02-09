@@ -45,7 +45,6 @@ interface HowItWorksStep {
     title: string;
     desc: string;
     icon: LucideIcon;
-    gradient: string;
 }
 
 interface PricingPlan {
@@ -118,21 +117,18 @@ export default function LandingPage() {
             title: "Add your properties",
             desc: "Just the name. Nothing else. Get started in seconds, not hours.",
             icon: Building2,
-            gradient: "from-purple-500 to-purple-600",
         },
         {
             step: "2",
             title: "Log bookings & transactions",
             desc: "Add a bookings, earnings, expenses, and scan bills with OCR.",
             icon: Zap,
-            gradient: "from-blue-500 to-blue-600",
         },
         {
             step: "3",
             title: "See monthly clarity",
             desc: "Property finances at a glance. Ready to export or share with your accountant.",
             icon: Calendar,
-            gradient: "from-green-500 to-green-600",
         },
     ];
 
@@ -508,7 +504,7 @@ export default function LandingPage() {
 
                         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight px-4">
                             Three steps to
-                            <span className="text-slate-400 font-semibold">
+                            <span className="text-brand opacity-80 font-semibold">
                                 {" "}
                                 financial clarity
                             </span>
@@ -682,7 +678,7 @@ export default function LandingPage() {
                             <p className="text-2xl font-bold text-gray-900 mb-2">
                                 This is not accounting software.
                             </p>
-                            <p className="text-2xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            <p className="text-2xl font-bold bg-linear-to-r from-blue-600 to-purple-500 bg-clip-text text-transparent">
                                 It's clarity software.
                             </p>
                         </div>
@@ -1042,7 +1038,7 @@ export default function LandingPage() {
                         <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6 sm:mb-8 px-4">
                             Replace Complexities
                             <br />
-                            <span className="bg-linear-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                            <span className="bg-linear-to-r from-blue-600 via-teal-500 to-blue-700 bg-clip-text text-transparent">
                                 in 10 minutes
                             </span>
                         </h2>

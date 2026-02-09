@@ -11,17 +11,16 @@ export default [
     route("/contact", "routes/contact.tsx"),
     route("/signin", "routes/login.tsx", { id: "signin" }),
     route("/signup", "routes/login.tsx", { id: "signup" }),
-    // route("/auth/callback", "routes/callback.tsx"),
 
     // All protected routes under layout
-    // layout("routes/app.layout.tsx", [
-    //     route("/app/onboarding", "routes/app.onboarding.tsx"),
-    //     route("/app/dashboard", "routes/app.dashboard.tsx"),
-    //     route("/app/bookings", "routes/app.bookings.tsx"),
-    //     route("/app/earnings", "routes/app.earnings.tsx"),
-    //     route("/app/expenses", "routes/app.expenses.tsx"),
-    //     route("/app/properties", "routes/app.properties.tsx"),
-    //     route("/app/reports", "routes/app.reports.tsx"),
-    //     route("/app/settings", "routes/app.settings.tsx"),
-    // ]),
+    layout("routes/app.layout.tsx", [
+        route("/app/onboarding", "routes/app.onboarding.tsx"),
+        route("/app/dashboard", "routes/app.dashboard.tsx"),
+        route("/app/bookings", "routes/app.bookings.tsx"),
+        route("/app/earnings", "routes/app.earnings.tsx"),
+        route("/app/expenses", "routes/app.expenses.tsx"),
+        route("/app/properties", "routes/app.properties.tsx"),
+        route("/app/reports", "routes/app.reports.tsx"),
+        route("/app/settings", "routes/app.settings.tsx"),
+    ]),
 ] satisfies RouteConfig;

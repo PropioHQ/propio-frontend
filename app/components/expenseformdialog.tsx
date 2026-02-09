@@ -18,11 +18,7 @@ import { cn } from "@/lib/utils";
 import { EXPENSE_KEY } from "@/querykeys";
 import AttachmentService from "@/services/attachment.service";
 import ExpenseService from "@/services/expense.service";
-import {
-    EXPENSE_CATEGORIES,
-    type ExpenseCategory,
-    ExpensePaymentMode,
-} from "@/types";
+import { ExpenseCategory, ExpensePaymentMode } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Download, FileText, LoaderCircle, Upload, X } from "lucide-react";
@@ -289,7 +285,7 @@ export default function ExpenseFormDialog({
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                         <div className="flex flex-col">
-                            <Label>Record Date *</Label>
+                            <Label>Record date *</Label>
                             <Popover modal>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -368,16 +364,18 @@ export default function ExpenseFormDialog({
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {EXPENSE_CATEGORIES.map((c) => (
-                                            <SelectItem key={c} value={c}>
-                                                {c}
-                                            </SelectItem>
-                                        ))}
+                                        {Object.values(ExpenseCategory).map(
+                                            (c) => (
+                                                <SelectItem key={c} value={c}>
+                                                    {c}
+                                                </SelectItem>
+                                            ),
+                                        )}
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div>
-                                <Label>Payment Mode *</Label>
+                                <Label>Payment mode *</Label>
                                 <Select
                                     key={formData.payment_mode}
                                     value={formData.payment_mode}

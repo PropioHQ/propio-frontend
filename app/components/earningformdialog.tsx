@@ -14,12 +14,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { BOOKING_KEY } from "@/querykeys";
+import { EARNING_KEY } from "@/querykeys";
 import AttachmentService from "@/services/attachment.service";
-import BookingService from "@/services/booking.service";
-import { BookingPaymentMode, BookingSource } from "@/types";
+import EarningService from "@/services/earning.service";
+import { BookingSource } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Download, FileText, LoaderCircle, Upload, X } from "lucide-react";
@@ -29,12 +28,21 @@ import { toast } from "sonner";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
+interface FormDataSchema {
+    record_date: Date;
+    earning_source: BookingSource;
+    tds_value: number | string;
+    gst_value: number | string;
+    gross_amount: number | string;
+    note: string;
+}
+
 const FILE_SIZE_MB = 5;
 
-export default function BookingFormDialog({
+export default function EarningFormDialog({
     open,
     onOpenChange,
-    bookingId,
+    earningId,
     propertyId,
     onSuccess,
 }) {
@@ -44,24 +52,21 @@ export default function BookingFormDialog({
         { _id: string; label: string; saved: boolean }[]
     >([]);
 
-    const [formData, setFormData] = useState({
-        check_in: new Date(),
-        check_out: new Date(),
-        amount: "",
-        booking_source: BookingSource.DIRECT,
-        guest_name: "",
-        guest_count: "",
-        payment_mode: BookingPaymentMode.UPI,
+    const [formData, setFormData] = useState<FormDataSchema>({
+        record_date: new Date(),
+        earning_source: "" as BookingSource,
+        tds_value: "",
+        gst_value: "",
+        gross_amount: "",
         note: "",
-        generate_receipt: false,
     });
 
-    const bookingQueryKey = [BOOKING_KEY, bookingId, propertyId];
+    const earningQueryKey = [EARNING_KEY, earningId, propertyId];
 
-    const { data: booking, isLoading: bookingLoading } = useQuery({
-        queryKey: bookingQueryKey,
-        queryFn: () => BookingService.getBooking(bookingId, propertyId),
-        enabled: Boolean(bookingId && propertyId),
+    const { data: earning, isLoading: earningLoading } = useQuery({
+        queryKey: earningQueryKey,
+        queryFn: () => EarningService.getEarning(earningId, propertyId),
+        enabled: Boolean(earningId && propertyId),
         staleTime: 0,
     });
 
@@ -126,55 +131,27 @@ export default function BookingFormDialog({
         }
 
         let {
-            check_in,
-            check_out,
-            amount,
-            booking_source,
-            guest_name,
-            guest_count,
-            payment_mode,
+            record_date,
+            earning_source,
+            tds_value,
+            gst_value,
+            gross_amount,
             note,
-        }: {
-            check_in: Date;
-            check_out: Date;
-            amount: string | number;
-            booking_source: BookingSource;
-            guest_name: string;
-            guest_count: string | number;
-            payment_mode: BookingPaymentMode;
-            note?: string;
-        } = formData;
+        }: FormDataSchema = formData;
 
-        const required = [
-            check_in,
-            check_out,
-            amount,
-            booking_source,
-            guest_name?.trim(),
-            guest_count,
-            payment_mode,
-        ];
+        const required = [record_date, earning_source, gross_amount];
 
         if (required.some((v) => !v)) {
             toast.error("Please fill all required fields");
             return;
         }
 
-        amount = Number(amount);
-        guest_count = Number(guest_count);
+        gross_amount = Number(gross_amount);
+        tds_value = Number(tds_value);
+        gst_value = Number(gst_value);
 
-        if (check_in > check_out) {
-            toast.error("Check-in date should be before check-out date");
-            return;
-        }
-
-        if (isNaN(amount) || amount <= 0) {
-            toast.error("Please enter a valid amount");
-            return;
-        }
-
-        if (isNaN(guest_count) || guest_count <= 0) {
-            toast.error("Please enter a valid guest count");
+        if (isNaN(gross_amount) || gross_amount <= 0) {
+            toast.error("Please enter a valid gross amount");
             return;
         }
 
@@ -182,41 +159,37 @@ export default function BookingFormDialog({
 
         setSubmitting(true);
         try {
-            if (bookingId) {
-                await BookingService.updateBooking(
-                    bookingId,
+            if (earningId) {
+                await EarningService.updateEarning(
+                    earningId,
                     propertyId,
-                    guest_name,
-                    guest_count,
-                    check_in,
-                    check_out,
-                    amount,
-                    booking_source,
-                    payment_mode,
+                    record_date,
+                    earning_source,
+                    tds_value,
+                    gst_value,
+                    gross_amount,
                     note,
                     attachmentIds,
                 );
-                toast.success("Booking updated successfully!");
+                toast.success("Record updated successfully!");
             } else {
-                await BookingService.addBooking(
+                await EarningService.addEarning(
                     propertyId,
-                    guest_name,
-                    guest_count,
-                    check_in,
-                    check_out,
-                    amount,
-                    booking_source,
-                    payment_mode,
+                    record_date,
+                    earning_source,
+                    tds_value,
+                    gst_value,
+                    gross_amount,
                     note,
                     attachmentIds,
                 );
-                toast.success("Booking added successfully!");
+                toast.success("Record added successfully!");
             }
 
             onOpenChange(false);
             if (onSuccess) onSuccess();
         } catch (error) {
-            toast.error(error.message || "Failed to save booking");
+            toast.error(error.message || "Failed to save record");
         } finally {
             setSubmitting(false);
         }
@@ -224,9 +197,9 @@ export default function BookingFormDialog({
 
     const handleDelete = async () => {
         if (
-            !bookingId ||
+            !earningId ||
             !window.confirm(
-                "Are you sure you want to delete this booking? This action cannot be undone.",
+                "Are you sure you want to delete this record? This action cannot be undone.",
             )
         ) {
             return;
@@ -234,12 +207,12 @@ export default function BookingFormDialog({
 
         setSubmitting(true);
         try {
-            await BookingService.deleteBooking(bookingId, propertyId);
-            toast.success("Booking deleted successfully!");
+            await EarningService.deleteEarning(earningId, propertyId);
+            toast.success("Record deleted successfully!");
             onOpenChange(false);
             if (onSuccess) onSuccess();
         } catch (error) {
-            toast.error("Failed to delete booking");
+            toast.error("Failed to delete record");
         } finally {
             setSubmitting(false);
         }
@@ -275,22 +248,19 @@ export default function BookingFormDialog({
     };
 
     useEffect(() => {
-        if (booking) {
+        if (earning) {
             setFormData({
-                check_in: new Date(booking.check_in),
-                check_out: new Date(booking.check_out),
-                amount: booking.amount,
-                booking_source: booking.booking_source,
-                guest_name: booking.guest_name,
-                guest_count: booking.guest_count,
-                payment_mode: booking.payment_mode,
-                note: booking.note || "",
-                generate_receipt: false,
+                record_date: new Date(earning.record_date),
+                earning_source: earning.earning_source,
+                tds_value: earning.tds_value,
+                gst_value: earning.gst_value,
+                gross_amount: earning.gross_amount,
+                note: earning.note || "",
             });
 
-            if (booking.attachments?.length) {
+            if (earning.attachments?.length) {
                 setAttachments(
-                    booking.attachments.map((a) => ({
+                    earning.attachments.map((a) => ({
                         _id: a._id,
                         label: a.label,
                         saved: true,
@@ -298,79 +268,40 @@ export default function BookingFormDialog({
                 );
             }
         }
-    }, [booking]);
+    }, [earning]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 className="max-w-lg max-h-[90vh] overflow-y-auto"
-                aria-describedby="Booking Form"
+                aria-describedby="Earning Form"
             >
                 <DialogHeader>
                     <DialogTitle>
-                        {bookingId ? "Edit Booking" : "Add New Booking"}
+                        {earningId ? "Edit Earning" : "Add New Earning"}
                     </DialogTitle>
                 </DialogHeader>
 
-                {bookingLoading ? (
+                {earningLoading ? (
                     <div className="mx-auto py-[30vh]">
                         <LoaderCircle className="animate-spin" />
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-col">
-                                <Label>Check-in date *</Label>
+                            <div className="flex flex-col justify-end">
+                                <Label>Record date *</Label>
                                 <Popover modal>
-                                    <PopoverTrigger asChild>
+                                    <PopoverTrigger asChild className="mt-2">
                                         <Button
                                             type="button"
                                             variant="outline"
                                             id="date-picker-simple"
-                                            className="justify-start font-normal mt-1 hover:bg-background"
+                                            className="justify-start font-normal hover:bg-background"
                                         >
-                                            {formData.check_in ? (
-                                                dayjs(formData.check_in).format(
-                                                    "MMM D, YYYY",
-                                                )
-                                            ) : (
-                                                <span>Pick a date</span>
-                                            )}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent
-                                        className="w-52 p-0"
-                                        align="start"
-                                    >
-                                        <Calendar
-                                            mode="single"
-                                            className="w-full rounded-lg"
-                                            selected={formData.check_in}
-                                            onSelect={(d) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    check_in: d,
-                                                })
-                                            }
-                                            defaultMonth={new Date()}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <Label>Check-out date *</Label>
-                                <Popover modal>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            id="date-picker-simple"
-                                            className="justify-start font-normal mt-1 hover:bg-background"
-                                        >
-                                            {formData.check_out ? (
+                                            {formData.record_date ? (
                                                 dayjs(
-                                                    formData.check_out,
+                                                    formData.record_date,
                                                 ).format("MMM D, YYYY")
                                             ) : (
                                                 <span>Pick a date</span>
@@ -382,13 +313,13 @@ export default function BookingFormDialog({
                                         align="start"
                                     >
                                         <Calendar
-                                            className="w-full rounded-lg"
                                             mode="single"
-                                            selected={formData.check_out}
+                                            className="w-full rounded-lg"
+                                            selected={formData.record_date}
                                             onSelect={(d) =>
                                                 setFormData({
                                                     ...formData,
-                                                    check_out: d,
+                                                    record_date: d,
                                                 })
                                             }
                                             defaultMonth={new Date()}
@@ -396,122 +327,25 @@ export default function BookingFormDialog({
                                     </PopoverContent>
                                 </Popover>
                             </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label>Guest name *</Label>
-                                <Input
-                                    type="text"
-                                    required
-                                    value={formData.guest_name}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            guest_name: e.target.value,
-                                        })
-                                    }
-                                    className="mt-1"
-                                />
-                            </div>
-
-                            <div>
-                                <Label>Guest count *</Label>
-                                <Input
-                                    type="text"
-                                    required
-                                    value={formData.guest_count}
-                                    onChange={(e) => {
-                                        const v = Number(e.target.value);
-                                        const guest_count =
-                                            isNaN(v) || !v
-                                                ? ""
-                                                : Math.abs(v).toString();
-
-                                        setFormData({
-                                            ...formData,
-                                            guest_count,
-                                        });
-                                    }}
-                                    className="mt-1"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <Label>Amount *</Label>
-                            <Input
-                                type="text"
-                                required
-                                min={0}
-                                value={formData.amount}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    const amount =
-                                        isNaN(v) || !v
-                                            ? ""
-                                            : Math.abs(v).toString();
-
-                                    setFormData({
-                                        ...formData,
-                                        amount,
-                                    });
-                                }}
-                                className="mt-1"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label>Booking source *</Label>
+                                <Label>Earning source *</Label>
                                 <Select
-                                    key={formData.booking_source}
-                                    value={formData.booking_source}
+                                    key={formData.earning_source}
+                                    value={formData.earning_source}
                                     onValueChange={(value) =>
                                         setFormData({
                                             ...formData,
-                                            booking_source:
+                                            earning_source:
                                                 value as BookingSource,
                                         })
                                     }
                                     required
                                 >
                                     <SelectTrigger className="mt-1">
-                                        <SelectValue />
+                                        <SelectValue placeholder="Select earning source" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {Object.values(BookingSource).map(
-                                            (source) => (
-                                                <SelectItem
-                                                    key={source}
-                                                    value={source}
-                                                >
-                                                    {source}
-                                                </SelectItem>
-                                            ),
-                                        )}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>Payment mode *</Label>
-                                <Select
-                                    key={formData.payment_mode}
-                                    value={formData.payment_mode}
-                                    required
-                                    onValueChange={(value) =>
-                                        setFormData({
-                                            ...formData,
-                                            payment_mode:
-                                                value as BookingPaymentMode,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="mt-1">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Object.values(BookingPaymentMode).map(
                                             (mode) => (
                                                 <SelectItem
                                                     key={mode}
@@ -523,6 +357,74 @@ export default function BookingFormDialog({
                                         )}
                                     </SelectContent>
                                 </Select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <Label>Received amount *</Label>
+                            <Input
+                                type="text"
+                                required
+                                min={0}
+                                value={formData.gross_amount}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    const amount =
+                                        isNaN(v) || !v
+                                            ? ""
+                                            : Math.abs(v).toString();
+
+                                    setFormData({
+                                        ...formData,
+                                        gross_amount: amount,
+                                    });
+                                }}
+                                className="mt-1"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label>GST amount</Label>
+                                <Input
+                                    type="text"
+                                    min={0}
+                                    value={formData.gst_value}
+                                    onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        const amount =
+                                            isNaN(v) || !v
+                                                ? ""
+                                                : Math.abs(v).toString();
+
+                                        setFormData({
+                                            ...formData,
+                                            gst_value: amount,
+                                        });
+                                    }}
+                                    className="mt-1"
+                                />
+                            </div>
+                            <div>
+                                <Label>TDS amount</Label>
+                                <Input
+                                    type="text"
+                                    min={0}
+                                    value={formData.tds_value}
+                                    onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        const amount =
+                                            isNaN(v) || !v
+                                                ? ""
+                                                : Math.abs(v).toString();
+
+                                        setFormData({
+                                            ...formData,
+                                            tds_value: amount,
+                                        });
+                                    }}
+                                    className="mt-1"
+                                />
                             </div>
                         </div>
 
@@ -540,46 +442,6 @@ export default function BookingFormDialog({
                                 className="mt-1"
                             />
                         </div>
-
-                        {/* Receipt Section */}
-                        {booking?.receipt_id ? (
-                            <div className="p-4 bg-blue-50 rounded-lg">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="w-5 h-5 text-blue-600" />
-                                        <span className="text-sm font-medium">
-                                            Booking Receipt
-                                        </span>
-                                    </div>
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="link"
-                                        onClick={() =>
-                                            handleFileDownload(
-                                                booking.receipt_id,
-                                            )
-                                        }
-                                    >
-                                        <Download className="w-4 h-4 mr-1" />
-                                        Download
-                                    </Button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex items-center justify-between">
-                                <Label>Generate Receipt</Label>
-                                <Switch
-                                    checked={formData.generate_receipt}
-                                    onCheckedChange={(checked) =>
-                                        setFormData({
-                                            ...formData,
-                                            generate_receipt: checked,
-                                        })
-                                    }
-                                />
-                            </div>
-                        )}
 
                         {/* Attachments Section */}
                         <div>
@@ -669,7 +531,7 @@ export default function BookingFormDialog({
                         </div>
 
                         <div className="flex gap-3 pt-4">
-                            {bookingId ? (
+                            {earningId ? (
                                 <Button
                                     type="button"
                                     variant="destructive"
@@ -687,7 +549,7 @@ export default function BookingFormDialog({
                             >
                                 {submitting
                                     ? "Saving..."
-                                    : bookingId
+                                    : earningId
                                       ? "Update"
                                       : "Save"}
                             </Button>

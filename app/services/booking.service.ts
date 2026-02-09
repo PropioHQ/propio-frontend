@@ -18,21 +18,6 @@ const BookingService = {
 
         return await API.get(`/api/v1/booking/all?${queryStr}`);
     },
-    getMonthlyStats: async (
-        propertyIds: string[],
-        month: number,
-        year: number,
-    ) => {
-        const params = new URLSearchParams();
-
-        params.append("m", month.toString());
-        params.append("y", year.toString());
-        params.append("pids", propertyIds.join(","));
-
-        const queryStr = params.toString();
-
-        return await API.get(`/api/v1/booking/stats/monthly?${queryStr}`);
-    },
     addBooking: async (
         property_id: string,
         guest_name: string,

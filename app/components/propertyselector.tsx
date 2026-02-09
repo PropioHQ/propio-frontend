@@ -20,7 +20,7 @@ export default function PropertySelector({
         <Select value={value} onValueChange={onSelect}>
             <SelectTrigger
                 data-testid="property-selector"
-                className="w-full sm:w-64 bg-white"
+                className="w-full sm:w-52 bg-white"
             >
                 <Building2 className="w-4 h-4 mr-2 text-gray-500" />
                 <SelectValue placeholder="Select property" />

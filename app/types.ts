@@ -4,8 +4,6 @@ export enum UserRoles {
     MANAGER = "Manager",
 }
 
-// enums.ts
-
 // Booking Sources
 export enum BookingSource {
     DIRECT = "Direct",
@@ -32,22 +30,19 @@ export enum ExpensePaymentMode {
     BANK_TRANSFER = "Bank Transfer",
 }
 
-// Expense Categories (const + union, not enum)
-export const EXPENSE_CATEGORIES = [
-    "Electricity",
-    "Water",
-    "Toiletries",
-    "Laundry",
-    "Food & Drinks",
-    "Cook Gas",
-    "Platform Fee",
-    "Salary",
-    "Property Rent",
-    "Property Tax",
-    "Property Maintenance",
-    "Society Maintenance",
-    "Legal & Compliance",
-    "Others",
-] as const;
-
-export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
+export enum ExpenseCategory {
+    ELECTRICITY = "Electricity",
+    WATER = "Water",
+    TOILETRIES = "Toiletries",
+    LAUNDRY = "Laundry",
+    FOOD_DRINKS = "Food & Drinks",
+    COOK_GAS = "Cook Gas",
+    PLATFORM_FEE = "Platform Fee",
+    SALARY = "Salary",
+    PROPERTY_RENT = "Property Rent",
+    PROPERTY_TAX = "Property Tax",
+    PROPERTY_MAINTENANCE = "Property Maintenance",
+    SOCIETY_MAINTENANCE = "Society Maintenance",
+    LEGAL_COMPLIANCE = "Legal & Compliance",
+    OTHERS = "Others",
+}

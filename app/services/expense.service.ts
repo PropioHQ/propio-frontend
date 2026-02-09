@@ -1,5 +1,5 @@
 import API from "@/lib/api";
-import { type ExpenseCategory, ExpensePaymentMode } from "@/types";
+import { ExpenseCategory, ExpensePaymentMode } from "@/types";
 
 const ExpenseService = {
     getExpense: async (expenseId: string, propertyId: string) => {
@@ -17,21 +17,6 @@ const ExpenseService = {
         const queryStr = params.toString();
 
         return await API.get(`/api/v1/expense/all?${queryStr}`);
-    },
-    getMonthlyStats: async (
-        propertyIds: string[],
-        month: number,
-        year: number,
-    ) => {
-        const params = new URLSearchParams();
-
-        params.append("m", month.toString());
-        params.append("y", year.toString());
-        params.append("pids", propertyIds.join(","));
-
-        const queryStr = params.toString();
-
-        return await API.get(`/api/v1/expense/stats/monthly?${queryStr}`);
     },
     addExpense: async (
         property_id: string,

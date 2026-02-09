@@ -9,6 +9,7 @@ export const USER_PROFILE_KEY = "user-profile";
 export const PROPERTY_COUNT_KEY = "property-count";
 export const PROPERTIES_KEY = "properties-list";
 export const PROPERTY_KEY = "property-details";
+export const PROPERTIES_REPORTS = "properties-reports";
 
 // booking
 export const BOOKINGS_KEY = "bookings-key";

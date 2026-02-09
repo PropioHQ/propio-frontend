@@ -1,6 +1,8 @@
+import AmountLabel from "@/components/amountlabel";
 import ExpenseFormDialog from "@/components/expenseformdialog";
 import PropertySelector from "@/components/propertyselector";
 import ScreenLoader from "@/components/screenloader";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EXPENSES_KEY, PROPERTIES_KEY } from "@/querykeys";
 import ExpenseService from "@/services/expense.service";
@@ -8,7 +10,7 @@ import PropertyService from "@/services/property.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import { BanknoteArrowDown, Calendar, Edit, Plus, Store } from "lucide-react";
+import { Calendar, Edit, EllipsisVertical, Plus, Store } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function Expenses() {
@@ -97,24 +99,20 @@ export default function Expenses() {
                         Overview
                     </p>
                 </div>
-
-                <PropertySelector
-                    properties={properties}
-                    value={selectedProperty}
-                    onSelect={setSelectedProperty}
-                />
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex gap-3 mb-6">
-                <Button
-                    data-testid="add-expense-button"
-                    onClick={handleAddNew}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Expense
-                </Button>
+                <div className="flex flex-row items-center gap-3">
+                    <Button
+                        data-testid="add-expense-button"
+                        onClick={handleAddNew}
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Expense
+                    </Button>
+                    <PropertySelector
+                        properties={properties}
+                        value={selectedProperty}
+                        onSelect={setSelectedProperty}
+                    />
+                </div>
             </div>
 
             <div className="bg-white" data-testid="expenses-list">
@@ -130,10 +128,10 @@ export default function Expenses() {
                                 <thead>
                                     <tr className="border-b bg-gray-50">
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Category
+                                            Date
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Date
+                                            Category
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                             Vendor
@@ -162,22 +160,29 @@ export default function Expenses() {
                                             className="hover:bg-gray-50 transition-colors"
                                         >
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                {expense.category}
-                                            </td>
-                                            <td className="px-4 py-4 text-sm text-gray-700">
                                                 {dayjs(
                                                     expense.record_date,
-                                                ).format("MMM D, YYYY")}
+                                                ).format("Do MMM")}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm">
+                                                <Badge
+                                                    variant={expense.category}
+                                                >
+                                                    {expense.category}
+                                                </Badge>
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                {expense.vendor_name || ""}
+                                                {expense.vendor_name ||
+                                                    "Unknown"}
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 {expense.payment_mode || ""}
                                             </td>
-                                            <td className="px-4 py-4 text-gray-700 font-semibold">
-                                                ₹
-                                                {expense.amount.toLocaleString()}
+                                            <td className="px-4 py-4 text-rose-700 text-sm font-semibold">
+                                                -
+                                                <AmountLabel
+                                                    value={expense.amount}
+                                                />
                                             </td>
                                             <td className="px-4 py-4 text-right">
                                                 <Button
@@ -204,7 +209,7 @@ export default function Expenses() {
                             {expenses.map((expense, index) => (
                                 <motion.div
                                     key={expense._id}
-                                    initial={{ opacity: 0, y: 8 }}
+                                    initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{
                                         duration: 0.25,
@@ -212,57 +217,75 @@ export default function Expenses() {
                                         delay: index * 0.03,
                                     }}
                                     whileTap={{ scale: 0.985 }}
-                                    className="rounded-lg bg-white border border-gray-200 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                                    className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                                 >
-                                    <div className="px-4 py-3">
-                                        {/* Top Row */}
+                                    {/* Amount Accent Strip */}
+                                    <div className="absolute left-0 top-0 h-full w-1 bg-gray-900/80" />
+
+                                    <div className="p-4">
+                                        {/* Header Row */}
                                         <div className="flex items-start justify-between gap-3">
-                                            <div className="min-w-0 space-y-1">
-                                                <p className="text-sm font-medium text-gray-900 truncate">
+                                            <div className="min-w-0 space-y-1.5">
+                                                <Badge
+                                                    variant={expense.category}
+                                                    className="truncate text-xs"
+                                                >
                                                     {expense.category}
-                                                </p>
+                                                </Badge>
 
-                                                <span className="flex items-center gap-1.5 text-xs text-gray-600">
-                                                    <Store className="h-3.5 w-3.5 text-gray-400" />
-                                                    {expense.vendor_name || "-"}
-                                                </span>
-                                            </div>
-
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                                                    <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                                                    <Calendar className="h-3.5 w-3.5" />
                                                     {dayjs(
                                                         expense.record_date,
                                                     ).format("Do MMM")}
                                                 </div>
-                                                <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-600">
-                                                    <BanknoteArrowDown className="h-3.5 w-3.5 text-gray-400" />
-                                                    {expense.payment_mode}
-                                                </div>
+                                            </div>
+
+                                            <div className="text-right space-y-1">
+                                                <p className="text-base font-semibold tracking-tight">
+                                                    <AmountLabel
+                                                        value={expense.amount}
+                                                    />
+                                                </p>
+                                                <p className="text-[11px] text-gray-400">
+                                                    Spent
+                                                </p>
                                             </div>
                                         </div>
 
-                                        {/* Divider */}
-                                        <div className="my-2 h-px bg-gray-100/70" />
+                                        {/* Breakdown Grid */}
+                                        <div className="mt-4 grid grid-cols-10 gap-2 text-xs">
+                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                                <p className="text-[11px] text-gray-400">
+                                                    Vendor
+                                                </p>
+                                                <p className="text-gray-900">
+                                                    {expense.vendor_name ||
+                                                        "Unknown"}
+                                                </p>
+                                            </div>
 
-                                        {/* Bottom Row */}
-                                        <div className="flex items-center justify-between gap-3">
-                                            <p className="text-sm font-semibold shrink-0">
-                                                - ₹
-                                                {expense.amount.toLocaleString()}
-                                            </p>
-
-                                            <motion.button
+                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                                <p className="text-[11px] text-gray-400">
+                                                    Payment
+                                                </p>
+                                                <p className=" text-gray-900">
+                                                    {expense.payment_mode}
+                                                </p>
+                                            </div>
+                                            <div className="col-span-3" />
+                                            <Button
                                                 onClick={() =>
                                                     handleExpenseClick(
                                                         expense._id,
                                                     )
                                                 }
-                                                whileTap={{ scale: 0.9 }}
-                                                className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                                                variant="ghost"
+                                                size="icon"
+                                                aria-label="Edit expense"
                                             >
-                                                <Edit className="h-4 w-4" />
-                                            </motion.button>
+                                                <EllipsisVertical className="h-4 w-4 text-gray-700" />
+                                            </Button>
                                         </div>
                                     </div>
                                 </motion.div>

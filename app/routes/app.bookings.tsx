@@ -1,3 +1,4 @@
+import AmountLabel from "@/components/amountlabel";
 import BookingFormDialog from "@/components/bookingformdialog";
 import PropertySelector from "@/components/propertyselector";
 import ScreenLoader from "@/components/screenloader";
@@ -9,7 +10,14 @@ import PropertyService from "@/services/property.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import { CalendarRange, Edit, Receipt, Users } from "lucide-react";
+import {
+    Calendar,
+    CalendarRange,
+    Edit,
+    EllipsisVertical,
+    Plus,
+    Users,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function Bookings() {
@@ -99,23 +107,20 @@ export default function Bookings() {
                     </p>
                 </div>
 
-                <PropertySelector
-                    properties={properties}
-                    value={selectedProperty}
-                    onSelect={setSelectedProperty}
-                />
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex gap-3 mb-6">
-                <Button
-                    data-testid="add-booking-dashboard-btn"
-                    onClick={handleAddNew}
-                    className=" bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                    <Receipt className="w-4 h-4 mr-2" />
-                    Add Booking
-                </Button>
+                <div className="flex flex-row items-center gap-3">
+                    <Button
+                        data-testid="add-booking-dashboard-btn"
+                        onClick={handleAddNew}
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Booking
+                    </Button>
+                    <PropertySelector
+                        properties={properties}
+                        value={selectedProperty}
+                        onSelect={setSelectedProperty}
+                    />
+                </div>
             </div>
 
             <div className="bg-white" data-testid="bookings-list">
@@ -182,22 +187,27 @@ export default function Bookings() {
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 {dayjs(booking.check_in).format(
-                                                    "MMM D, YYYY",
+                                                    "Do MMM",
                                                 )}
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 {dayjs(
                                                     booking.check_out,
-                                                ).format("MMM D, YYYY")}
+                                                ).format("Do MMM")}
                                             </td>
                                             <td className="px-4 py-4">
-                                                <Badge variant="info">
-                                                    Direct
+                                                <Badge
+                                                    variant={
+                                                        booking.booking_source
+                                                    }
+                                                >
+                                                    {booking.booking_source}
                                                 </Badge>
                                             </td>
-                                            <td className="px-4 py-4 text-right font-semibold">
-                                                ₹
-                                                {booking.amount.toLocaleString()}
+                                            <td className="px-4 py-4 text-right text-sm font-semibold">
+                                                <AmountLabel
+                                                    value={booking.amount}
+                                                />
                                             </td>
                                             <td className="px-4 py-4 text-right">
                                                 <Button
@@ -219,12 +229,12 @@ export default function Bookings() {
                             </table>
                         </div>
 
-                        {/* Mobile Card View */}
+                        {/* Mobile Table View */}
                         <div className="md:hidden space-y-3">
                             {bookings.map((booking, index) => (
                                 <motion.div
                                     key={booking._id}
-                                    initial={{ opacity: 0, y: 8 }}
+                                    initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{
                                         duration: 0.25,
@@ -232,64 +242,87 @@ export default function Bookings() {
                                         delay: index * 0.03,
                                     }}
                                     whileTap={{ scale: 0.985 }}
-                                    className="rounded-lg bg-white border border-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                                    className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                                 >
-                                    <div className="px-4 py-3">
-                                        {/* Top Meta */}
-                                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                                            <span className="truncate">
-                                                {booking.ref}
-                                            </span>
-                                            <Badge variant="info">
-                                                {booking.booking_source}
-                                            </Badge>
-                                        </div>
+                                    {/* Amount Accent Strip */}
+                                    <div className="absolute left-0 top-0 h-full w-1 bg-gray-900/80" />
 
-                                        {/* Main Row */}
-                                        <div className="flex items-end justify-between gap-3">
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-medium text-gray-900 truncate">
-                                                    {booking.guest_name}
+                                    <div className="p-4">
+                                        {/* Header Row */}
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0 space-y-1.5">
+                                                <Badge
+                                                    variant={
+                                                        booking.booking_source
+                                                    }
+                                                >
+                                                    {booking.booking_source}
+                                                </Badge>
+
+                                                <p className="text-[11px] text-gray-400">
+                                                    #{booking.ref}
                                                 </p>
-
-                                                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-600">
-                                                    <Users className="h-3.5 w-3.5 text-gray-400" />
-                                                    {booking.guest_count} guest
-                                                </div>
                                             </div>
 
-                                            {/* Dates */}
-                                            <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                                                <CalendarRange className="h-3.5 w-3.5 text-gray-400" />
-                                                {dayjs(booking.check_in).format(
-                                                    "Do MMM",
-                                                )}{" "}
-                                                →{" "}
-                                                {dayjs(
-                                                    booking.check_out,
-                                                ).format("Do MMM")}
+                                            <div className="text-right space-y-1">
+                                                <p className="text-base font-semibold tracking-tight">
+                                                    <AmountLabel
+                                                        value={booking.amount}
+                                                    />
+                                                </p>
+                                                <p className="text-[11px] text-gray-400">
+                                                    {booking.guest_count}{" "}
+                                                    Guest(s)
+                                                </p>
                                             </div>
                                         </div>
 
-                                        {/* Divider */}
-                                        <div className="my-2 h-px bg-gray-100/70" />
-
-                                        <div className="flex items-center justify-between">
-                                            <p className="text-sm shrink-0">
-                                                + ₹
-                                                {booking.amount.toLocaleString()}
-                                            </p>
-                                            <motion.button
+                                        {/* Breakdown Grid */}
+                                        <div className="mt-4 grid grid-cols-10 gap-2 text-xs">
+                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                                <p className="text-[11px] text-gray-400">
+                                                    Guest
+                                                </p>
+                                                <p className="text-gray-900 truncate">
+                                                    {
+                                                        booking.guest_name.split(
+                                                            " ",
+                                                        )[0]
+                                                    }
+                                                </p>
+                                            </div>
+                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                                <p className="text-[11px] text-gray-400">
+                                                    Check-in
+                                                </p>
+                                                <p className=" text-gray-900">
+                                                    {dayjs(
+                                                        booking.check_in,
+                                                    ).format("Do MMM")}
+                                                </p>
+                                            </div>
+                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                                <p className="text-[11px] text-gray-400">
+                                                    Check-out
+                                                </p>
+                                                <p className=" text-gray-900">
+                                                    {dayjs(
+                                                        booking.check_out,
+                                                    ).format("Do MMM")}
+                                                </p>
+                                            </div>
+                                            <Button
                                                 onClick={() =>
                                                     handleBookingClick(
                                                         booking._id,
                                                     )
                                                 }
-                                                whileTap={{ scale: 0.9 }}
-                                                className="rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-700 p-2 transition-colors shrink-0"
+                                                variant="ghost"
+                                                size="icon"
+                                                aria-label="Edit expense"
                                             >
-                                                <Edit className="h-4 w-4" />
-                                            </motion.button>
+                                                <EllipsisVertical className="h-4 w-4 text-gray-700" />
+                                            </Button>
                                         </div>
                                     </div>
                                 </motion.div>

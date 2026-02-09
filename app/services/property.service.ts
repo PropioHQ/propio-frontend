@@ -10,6 +10,26 @@ const PropertyService = {
     getProperties: async () => {
         return await API.get("/api/v1/property/all");
     },
+    getMonthlyReport: async (
+        propertyIds: string[],
+        month: number,
+        year: number,
+        fullreport?: boolean,
+    ) => {
+        const params = new URLSearchParams();
+
+        params.append("m", month.toString());
+        params.append("y", year.toString());
+        params.append("pids", propertyIds.join(","));
+
+        if (fullreport) {
+            params.append("fullreport", "1");
+        }
+
+        const queryStr = params.toString();
+
+        return await API.get(`/api/v1/property/report/monthly?${queryStr}`);
+    },
     addProperty: async (
         name: string,
         city: string,

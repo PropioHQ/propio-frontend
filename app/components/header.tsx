@@ -17,21 +17,11 @@ export function Header() {
             <div className="mx-2 sm:mx-4 mt-2 sm:mt-4">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 bg-white/70 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-slate-200/50 shadow-lg shadow-slate-900/5">
                     <div className="flex justify-between items-center">
-                        <Link
-                            to="/"
-                            className="flex items-center gap-2 sm:gap-3 group"
-                        >
-                            <div className="relative">
-                                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-slate-900/20 group-hover:shadow-xl group-hover:shadow-slate-900/30 transition-shadow duration-300">
-                                    <span className="text-white font-bold text-base sm:text-lg">
-                                        P
-                                    </span>
-                                </div>
-                                <div className="absolute -inset-1 bg-linear-to-br from-emerald-500/20 to-violet-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            </div>
-                            <span className="text-lg sm:text-xl font-semibold text-slate-900">
-                                Propio
-                            </span>
+                        <Link to="/">
+                            <img
+                                src="/assets/logo-light.png"
+                                className="h-7 w-auto"
+                            />
                         </Link>
 
                         <nav className="hidden md:flex items-center gap-6 lg:gap-8">

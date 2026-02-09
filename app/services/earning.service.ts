@@ -18,21 +18,6 @@ const EarningService = {
 
         return await API.get(`/api/v1/earning/all?${queryStr}`);
     },
-    getMonthlyStats: async (
-        propertyIds: string[],
-        month: number,
-        year: number,
-    ) => {
-        const params = new URLSearchParams();
-
-        params.append("m", month.toString());
-        params.append("y", year.toString());
-        params.append("pids", propertyIds.join(","));
-
-        const queryStr = params.toString();
-
-        return await API.get(`/api/v1/earning/stats/monthly?${queryStr}`);
-    },
     addEarning: async (
         property_id: string,
         record_date: Date,
@@ -40,7 +25,8 @@ const EarningService = {
         tds_value: number,
         gst_value: number,
         gross_amount: number,
-        note?: string,
+        note: string,
+        attachmentIds: string[],
     ) => {
         return await API.post("/api/v1/earning", {
             property_id,
@@ -50,6 +36,7 @@ const EarningService = {
             gst_value,
             gross_amount,
             note,
+            attachmentIds,
         });
     },
     updateEarning: async (
@@ -60,7 +47,8 @@ const EarningService = {
         tds_value: number,
         gst_value: number,
         gross_amount: number,
-        note?: string,
+        note: string,
+        attachmentIds: string[],
     ) => {
         return await API.put("/api/v1/earning", {
             earning_id,
@@ -71,6 +59,7 @@ const EarningService = {
             gst_value,
             gross_amount,
             note,
+            attachmentIds,
         });
     },
     deleteEarning: async (earningId: string, propertyId: string) => {

@@ -1,5 +1,7 @@
 import ScreenLoader from "@/components/screenloader";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth.context";
+import { cn } from "@/lib/utils";
 import { PROPERTY_COUNT_KEY } from "@/querykeys";
 import PropertyService from "@/services/property.service";
 import { useQuery } from "@tanstack/react-query";
@@ -23,37 +25,31 @@ const NavItems = [
         path: "/app/dashboard",
         icon: Home,
         label: "Dashboard",
-        color: "#10b981",
     },
     {
         path: "/app/bookings",
         icon: Receipt,
         label: "Bookings",
-        color: "#3b82f6",
     },
     {
         path: "/app/earnings",
         icon: Wallet,
         label: "Earnings",
-        color: "#db1df6",
     },
     {
         path: "/app/expenses",
         icon: DollarSign,
         label: "Expenses",
-        color: "#ef4444",
     },
     {
         path: "/app/properties",
         icon: Building2,
         label: "Properties",
-        color: "#8b5cf6",
     },
     {
         path: "/app/reports",
         icon: FileText,
         label: "Reports",
-        color: "#f59e0b",
     },
 ];
 
@@ -112,17 +108,22 @@ export default function AppLayout() {
                 <>
                     {/* Desktop Sidebar */}
                     <aside
-                        className={`hidden md:flex md:flex-col ${collapsed ? "w-20" : "w-64"} bg-white border-r border-gray-200 transition-all duration-300 relative`}
+                        className={cn(
+                            "hidden md:flex md:flex-col bg-white border-r border-gray-200 transition-all duration-300 relative",
+                            collapsed ? "w-20" : "w-64",
+                        )}
                     >
-                        <div className="p-6 flex items-center justify-between">
-                            {!collapsed && (
-                                <h1 className="text-2xl font-bold">Propio</h1>
-                            )}
-                            {collapsed && (
-                                <div className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center text-white font-bold">
-                                    P
-                                </div>
-                            )}
+                        <div className="p-6 flex items-center gap-2">
+                            <img
+                                src={
+                                    collapsed
+                                        ? "/assets/logo-x.png"
+                                        : "/assets/logo-light.png"
+                                }
+                                className={cn("h-7 w-auto", {
+                                    "rounded-full": collapsed,
+                                })}
+                            />
                         </div>
 
                         <button
@@ -149,20 +150,21 @@ export default function AppLayout() {
                                         onClick={() =>
                                             handleNavigation(item.path)
                                         }
-                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                                        className={cn(
+                                            "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-transform",
                                             isActive
-                                                ? "bg-gray-900 text-white"
-                                                : "text-gray-700 hover:bg-gray-100"
-                                        }`}
+                                                ? "bg-primary text-white"
+                                                : "text-gray-700 hover:bg-gray-100",
+                                        )}
                                         title={collapsed ? item.label : ""}
                                     >
                                         <Icon
-                                            className="w-5 h-5"
-                                            style={{
-                                                color: isActive
-                                                    ? "white"
-                                                    : item.color,
-                                            }}
+                                            className={cn(
+                                                "w-4 h-4",
+                                                isActive
+                                                    ? "text-white"
+                                                    : "text-gray-600",
+                                            )}
                                         />
                                         {!collapsed && item.label}
                                     </button>
@@ -174,10 +176,10 @@ export default function AppLayout() {
                             <button
                                 data-testid="logout-button"
                                 onClick={handleLogout}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100`}
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
                                 title={collapsed ? "Logout" : ""}
                             >
-                                <LogOut className="w-5 h-5 text-red-500" />
+                                <LogOut className="w-4 h-4 text-red-500" />
                                 {!collapsed && "Logout"}
                             </button>
                         </div>
@@ -191,28 +193,30 @@ export default function AppLayout() {
                                 const isActive =
                                     location.pathname === item.path;
                                 return (
-                                    <button
+                                    <Button
                                         key={item.path}
                                         data-testid={`nav-${item.label.toLowerCase()}-mobile`}
                                         onClick={() =>
                                             handleNavigation(item.path)
                                         }
-                                        className={`flex flex-col items-center gap-1 px-3 py-2 text-xs ${
+                                        variant="ghost"
+                                        size="icon"
+                                        className={cn(
+                                            "p-2 rounded-lg",
                                             isActive
-                                                ? "text-gray-900"
-                                                : "text-gray-500"
-                                        }`}
+                                                ? "text-brand bg-blue-50"
+                                                : "text-gray-500",
+                                        )}
                                     >
                                         <Icon
-                                            className="w-5 h-5"
-                                            style={{
-                                                color: isActive
-                                                    ? item.color
-                                                    : undefined,
-                                            }}
+                                            className={cn(
+                                                "w-4 h-4",
+                                                isActive
+                                                    ? "text-brand"
+                                                    : "text-gray-600",
+                                            )}
                                         />
-                                        <span>{item.label}</span>
-                                    </button>
+                                    </Button>
                                 );
                             })}
                         </div>

@@ -47,6 +47,8 @@ input[type="number"]::-webkit-inner-spin-button {
 
 @layer base {
     :root {
+        --brand: 222, 100%, 50%;
+
         --background: 0 0% 100%;
         --foreground: 0 0% 10%;
         --card: 0 0% 100%;
@@ -110,6 +112,8 @@ input[type="number"]::-webkit-inner-spin-button {
 
 @theme inline {
     /* Semantic colors (from :root) – required for bg-background, text-foreground, border-border, etc. */
+    --color-brand: hsl(var(--brand));
+
     --color-background: hsl(var(--background));
     --color-foreground: hsl(var(--foreground));
     --color-card: hsl(var(--card));

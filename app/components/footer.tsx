@@ -1,7 +1,9 @@
 import { Link } from "react-router";
 import { motion } from "motion/react";
+import dayjs from "dayjs";
 
 export function Footer() {
+    const currentYear = dayjs().get("year");
     return (
         <motion.footer
             initial={{ y: -20, opacity: 0 }}
@@ -13,18 +15,11 @@ export function Footer() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 mb-12 sm:mb-16">
                     {/* Brand */}
                     <div className="sm:col-span-2">
-                        <Link
-                            to="/"
-                            className="flex items-center gap-3 mb-4 sm:mb-6"
-                        >
-                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                                <span className="text-slate-900 font-bold text-lg">
-                                    P
-                                </span>
-                            </div>
-                            <span className="text-xl font-semibold text-white">
-                                Propio
-                            </span>
+                        <Link to="/">
+                            <img
+                                src="/assets/logo-dark.png"
+                                className="h-7 w-auto"
+                            />
                         </Link>
                         <p className="text-slate-400 leading-relaxed max-w-sm mb-4 sm:mb-6 text-sm sm:text-base">
                             Replace Excel with clarity. Simple property finance
@@ -101,7 +96,7 @@ export function Footer() {
                 {/* Bottom bar */}
                 <div className="pt-6 sm:pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
                     <p className="text-slate-500 text-xs sm:text-sm text-center sm:text-left">
-                        © 2025 Propio. All rights reserved.
+                        © {currentYear} Propio. All rights reserved.
                     </p>
                     <p className="text-slate-500 text-xs sm:text-sm text-center sm:text-right">
                         Made with clarity in mind

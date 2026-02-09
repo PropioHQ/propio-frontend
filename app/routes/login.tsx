@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/auth.context";
 import AuthService from "@/services/auth.service";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 export default function Login() {
@@ -69,6 +69,12 @@ export default function Login() {
                     formData.otp,
                 );
             } else {
+                // TODO: Temporary disable
+                toast.info(
+                    "Onboarding of new user is paused. Please contact support.",
+                );
+                return;
+
                 response = await AuthService.signupWithEmail(
                     formData.name,
                     formData.email,
@@ -116,15 +122,20 @@ export default function Login() {
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4">
-            <div className="w-full max-w-md space-y-8">
+            <div className="w-full max-w-md space-y-8 p-8 rounded-xl shadow-md border border-gray-200">
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold mb-2">Propio</h1>
-                    <p className="text-base text-gray-600">
-                        Track your property bookings & expenses
+                    <Link to="/">
+                        <img
+                            src="/assets/logo-light.png"
+                            className="h-10 w-auto mx-auto"
+                        />
+                    </Link>
+                    <p className="mt-4 text-base text-gray-600">
+                        Track your property finances with AI insights
                     </p>
                 </div>
 
-                <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+                <div className="bg-white">
                     <h2
                         className="text-2xl font-semibold mb-6"
                         data-testid="auth-title"

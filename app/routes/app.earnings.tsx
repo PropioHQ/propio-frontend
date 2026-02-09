@@ -1,16 +1,17 @@
-import BookingFormDialog from "@/components/bookingformdialog";
+import AmountLabel from "@/components/amountlabel";
+import EarningFormDialog from "@/components/earningformdialog";
 import PropertySelector from "@/components/propertyselector";
 import ScreenLoader from "@/components/screenloader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BOOKINGS_KEY, EARNINGS_KEY, PROPERTIES_KEY } from "@/querykeys";
-import BookingService from "@/services/booking.service";
+import { cn } from "@/lib/utils";
+import { EARNINGS_KEY, PROPERTIES_KEY } from "@/querykeys";
 import EarningService from "@/services/earning.service";
 import PropertyService from "@/services/property.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import { CalendarRange, Edit, Receipt, Users } from "lucide-react";
+import { Calendar, Edit, EllipsisVertical, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function Earnings() {
@@ -100,23 +101,20 @@ export default function Earnings() {
                     </p>
                 </div>
 
-                <PropertySelector
-                    properties={properties}
-                    value={selectedProperty}
-                    onSelect={setSelectedProperty}
-                />
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex gap-3 mb-6">
-                <Button
-                    data-testid="add-earning-dashboard-btn"
-                    onClick={handleAddNew}
-                    className=" bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                    <Receipt className="w-4 h-4 mr-2" />
-                    Add Earning
-                </Button>
+                <div className="flex flex-row items-center gap-3">
+                    <Button
+                        data-testid="add-earning-dashboard-btn"
+                        onClick={handleAddNew}
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Earning
+                    </Button>
+                    <PropertySelector
+                        properties={properties}
+                        value={selectedProperty}
+                        onSelect={setSelectedProperty}
+                    />
+                </div>
             </div>
 
             <div className="bg-white" data-testid="earnings-list">
@@ -132,7 +130,7 @@ export default function Earnings() {
                                 <thead>
                                     <tr className="border-b bg-gray-50">
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Record date
+                                            Record Date
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                             Source
@@ -144,7 +142,7 @@ export default function Earnings() {
                                             TDS Amount
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Tax Value
+                                            GST Value
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                             Net Amount
@@ -169,28 +167,46 @@ export default function Earnings() {
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 {dayjs(
                                                     earning.record_date,
-                                                ).format("MMM D, YYYY")}
+                                                ).format("Do MMM")}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm">
+                                                <Badge
+                                                    variant={
+                                                        earning.earning_source
+                                                    }
+                                                >
+                                                    {earning.earning_source}
+                                                </Badge>
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                {earning.earning_source}
+                                                <AmountLabel
+                                                    value={earning.gross_amount}
+                                                />
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                ₹
-                                                {earning.gross_amount.toLocaleString()}
+                                                <AmountLabel
+                                                    value={earning.tds_value}
+                                                />
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                ₹
-                                                {earning?.tds_value?.toLocaleString() ||
-                                                    ""}
+                                                <AmountLabel
+                                                    value={earning.gst_value}
+                                                />
                                             </td>
-                                            <td className="px-4 py-4 text-sm text-gray-700">
-                                                ₹
-                                                {earning?.gst_value?.toLocaleString() ||
-                                                    ""}
-                                            </td>
-                                            <td className="px-4 py-4 text-sm text-gray-700">
-                                                ₹
-                                                {earning.net_amount.toLocaleString()}
+                                            <td
+                                                className={cn(
+                                                    "px-4 py-4 text-sm font-semibold",
+                                                    earning.net_amount >= 0
+                                                        ? "text-green-600"
+                                                        : "text-red-600",
+                                                )}
+                                            >
+                                                {earning.net_amount >= 0
+                                                    ? "+"
+                                                    : ""}
+                                                <AmountLabel
+                                                    value={earning.net_amount}
+                                                />
                                             </td>
                                             <td className="px-4 py-4 text-right">
                                                 <Button
@@ -212,12 +228,12 @@ export default function Earnings() {
                             </table>
                         </div>
 
-                        {/* Mobile Card View */}
+                        {/* Mobile Table View */}
                         <div className="md:hidden space-y-3">
-                            {bookings.map((booking, index) => (
+                            {earnings.map((earning, index) => (
                                 <motion.div
-                                    key={booking._id}
-                                    initial={{ opacity: 0, y: 8 }}
+                                    key={earning._id}
+                                    initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{
                                         duration: 0.25,
@@ -225,64 +241,98 @@ export default function Earnings() {
                                         delay: index * 0.03,
                                     }}
                                     whileTap={{ scale: 0.985 }}
-                                    className="rounded-lg bg-white border border-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                                    className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                                 >
-                                    <div className="px-4 py-3">
-                                        {/* Top Meta */}
-                                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                                            <span className="truncate">
-                                                {booking.ref}
-                                            </span>
-                                            <Badge variant="info">
-                                                {booking.booking_source}
-                                            </Badge>
-                                        </div>
+                                    {/* Amount Accent Strip */}
+                                    <div className="absolute left-0 top-0 h-full w-1 bg-gray-900/80" />
 
-                                        {/* Main Row */}
-                                        <div className="flex items-end justify-between gap-3">
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-medium text-gray-900 truncate">
-                                                    {booking.guest_name}
-                                                </p>
+                                    <div className="p-4">
+                                        {/* Header Row */}
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0 space-y-1.5">
+                                                <Badge
+                                                    variant={
+                                                        earning.earning_source
+                                                    }
+                                                >
+                                                    {earning.earning_source}
+                                                </Badge>
 
-                                                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-600">
-                                                    <Users className="h-3.5 w-3.5 text-gray-400" />
-                                                    {booking.guest_count} guest
+                                                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                                                    <Calendar className="h-3.5 w-3.5" />
+                                                    {dayjs(
+                                                        earning.record_date,
+                                                    ).format("Do MMM")}
                                                 </div>
                                             </div>
 
-                                            {/* Dates */}
-                                            <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                                                <CalendarRange className="h-3.5 w-3.5 text-gray-400" />
-                                                {dayjs(booking.check_in).format(
-                                                    "Do MMM",
-                                                )}{" "}
-                                                →{" "}
-                                                {dayjs(
-                                                    booking.check_out,
-                                                ).format("Do MMM")}
+                                            <div className="text-right space-y-1">
+                                                <p className="text-base font-semibold tracking-tight">
+                                                    <AmountLabel
+                                                        value={
+                                                            earning.gross_amount
+                                                        }
+                                                    />
+                                                </p>
+                                                <p className="text-[11px] text-gray-400">
+                                                    Earned
+                                                </p>
                                             </div>
                                         </div>
 
-                                        {/* Divider */}
-                                        <div className="my-2 h-px bg-gray-100/70" />
+                                        {/* Breakdown Grid */}
+                                        <div className="mt-4 grid grid-cols-10 gap-2 text-xs">
+                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                                <p className="text-[11px] text-gray-400">
+                                                    Net
+                                                </p>
+                                                <p className=" text-gray-900">
+                                                    <AmountLabel
+                                                        value={
+                                                            earning.net_amount
+                                                        }
+                                                    />
+                                                </p>
+                                            </div>
 
-                                        <div className="flex items-center justify-between">
-                                            <p className="text-sm shrink-0">
-                                                + ₹
-                                                {booking.amount.toLocaleString()}
-                                            </p>
-                                            <motion.button
+                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                                <p className="text-[11px] text-gray-400">
+                                                    TDS
+                                                </p>
+                                                <p className=" text-gray-900">
+                                                    <AmountLabel
+                                                        value={
+                                                            earning.tds_value
+                                                        }
+                                                    />
+                                                </p>
+                                            </div>
+
+                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                                <p className="text-[11px] text-gray-400">
+                                                    GST
+                                                </p>
+                                                <p className=" text-gray-900">
+                                                    <AmountLabel
+                                                        value={
+                                                            earning.gst_value
+                                                        }
+                                                    />
+                                                </p>
+                                            </div>
+
+                                            <Button
                                                 onClick={() =>
-                                                    handleBookingClick(
-                                                        booking._id,
+                                                    handleEarningClick(
+                                                        earning._id,
                                                     )
                                                 }
-                                                whileTap={{ scale: 0.9 }}
-                                                className="rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-700 p-2 transition-colors shrink-0"
+                                                variant="ghost"
+                                                size="icon"
+                                                aria-label="Edit earning"
                                             >
-                                                <Edit className="h-4 w-4" />
-                                            </motion.button>
+                                                <EllipsisVertical className="h-4 w-4 text-gray-700" />
+                                            </Button>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -293,14 +343,14 @@ export default function Earnings() {
             </div>
 
             {showDialog ? (
-                <BookingFormDialog
+                <EarningFormDialog
                     open={showDialog}
                     onOpenChange={setShowDialog}
-                    bookingId={selectedBooking}
+                    earningId={selectedEarning}
                     propertyId={selectedProperty}
                     onSuccess={() => {
-                        refreshBookings();
-                        setSelectedBooking(null);
+                        refreshEarnings();
+                        setSelectedEarning(null);
                     }}
                 />
             ) : null}

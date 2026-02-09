@@ -1,0 +1,296 @@
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    COUNTRIES_KEY,
+    COUNTRY_STATES_KEY,
+    PROPERTY_COUNT_KEY,
+} from "@/querykeys";
+import ConstantsService from "@/services/constants.service";
+import PropertyService from "@/services/property.service";
+import { UserRoles } from "@/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { LoaderCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "./ui/button";
+
+export default function PropertyForm({ onBack, onSuccess, property = null }) {
+    const queryClient = useQueryClient();
+
+    const [submitting, setSubmitting] = useState(false);
+    const [propertyData, setPropertyData] = useState({
+        name: "",
+        city: "",
+        state: "",
+        country: "",
+        role: UserRoles.OWNER,
+    });
+
+    const { data: countries = [] } = useQuery({
+        queryKey: [COUNTRIES_KEY],
+        queryFn: ConstantsService.getCountryNames,
+        staleTime: Infinity,
+    });
+
+    const { data: states = [] } = useQuery({
+        queryKey: [COUNTRY_STATES_KEY, propertyData.country],
+        queryFn: () =>
+            ConstantsService.getStatesByCountry(propertyData.country),
+        enabled: !!propertyData.country,
+        staleTime: Infinity,
+    });
+
+    const handleSubmit = async () => {
+        let { name, city, state, country, role } = propertyData;
+        name = name.trim();
+        city = city.trim();
+
+        if (!name || !city || !state || !country || !role) {
+            toast.error("All fields are required");
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            if (property) {
+                await PropertyService.updateProperty(
+                    property._id,
+                    name,
+                    city,
+                    state,
+                    country,
+                    role,
+                );
+            } else {
+                await PropertyService.addProperty(
+                    name,
+                    city,
+                    state,
+                    country,
+                    role,
+                );
+            }
+
+            // Refresh property count
+            queryClient.invalidateQueries({
+                queryKey: [PROPERTY_COUNT_KEY],
+            });
+
+            toast.success("Property added successfully!");
+            onSuccess && onSuccess();
+        } catch (error) {
+            toast.error(error.message || "Failed to add property");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    useEffect(() => {
+        if (countries && countries.length > 0) {
+            setPropertyData((prev) => {
+                if (!prev.country) {
+                    return { ...prev, country: countries[0] };
+                }
+                return prev;
+            });
+        }
+    }, [countries]);
+
+    useEffect(() => {
+        if (property) {
+            setPropertyData({
+                name: property.name,
+                city: property.city,
+                state: property.state,
+                country: property.country,
+                role: property.role as UserRoles,
+            });
+        }
+    }, [property]);
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <Label htmlFor="property-name">Property name *</Label>
+                <Input
+                    id="property-name"
+                    data-testid="property-name-input"
+                    type="text"
+                    placeholder="e.g., Beach Villa, Mountain Cottage"
+                    value={propertyData.name}
+                    onChange={(e) =>
+                        setPropertyData({
+                            ...propertyData,
+                            name: e.target.value,
+                        })
+                    }
+                    required
+                    className="mt-2 text-base"
+                />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <Label htmlFor="country">Country *</Label>
+                    <Select
+                        key={propertyData.country}
+                        value={propertyData.country}
+                        onValueChange={(value) =>
+                            setPropertyData({
+                                ...propertyData,
+                                country: value,
+                                state: "",
+                            })
+                        }
+                        required
+                    >
+                        <SelectTrigger
+                            data-testid="country-select"
+                            className="mt-2"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent
+                            position="popper"
+                            side="bottom"
+                            align="start"
+                            sideOffset={4}
+                            className="max-h-64 overflow-y-auto"
+                        >
+                            {countries.map((country) => (
+                                <SelectItem key={country} value={country}>
+                                    {country}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Label htmlFor="state">State *</Label>
+                    <Select
+                        key={propertyData.state}
+                        value={propertyData.state}
+                        onValueChange={(value) =>
+                            setPropertyData({
+                                ...propertyData,
+                                state: value,
+                            })
+                        }
+                        disabled={!propertyData.country}
+                        required
+                    >
+                        <SelectTrigger
+                            data-testid="state-select"
+                            className="mt-2"
+                        >
+                            <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent
+                            position="popper"
+                            side="bottom"
+                            align="start"
+                            sideOffset={4}
+                            className="max-h-64 overflow-y-auto"
+                        >
+                            {states.map((state) => (
+                                <SelectItem key={state} value={state}>
+                                    {state}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <Label htmlFor="city">City/Town *</Label>
+                    <Input
+                        id="city"
+                        data-testid="city-input"
+                        type="text"
+                        placeholder="e.g., Goa, Manali"
+                        value={propertyData.city}
+                        onChange={(e) =>
+                            setPropertyData({
+                                ...propertyData,
+                                city: e.target.value,
+                            })
+                        }
+                        required
+                        className="mt-2 text-base"
+                    />
+                </div>
+                <div>
+                    <Label htmlFor="role">Role *</Label>
+                    <Select
+                        value={propertyData.role}
+                        onValueChange={(value) =>
+                            setPropertyData({
+                                ...propertyData,
+                                role: value as UserRoles,
+                            })
+                        }
+                        required
+                    >
+                        <SelectTrigger
+                            data-testid="role-select"
+                            className="mt-2"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent
+                            position="popper"
+                            side="bottom"
+                            align="start"
+                            sideOffset={4}
+                            className="max-h-64 overflow-y-auto"
+                        >
+                            {Object.values(UserRoles).map((role) => (
+                                <SelectItem key={role} value={role}>
+                                    {role}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onBack}
+                    className="flex-1"
+                    disabled={submitting}
+                >
+                    Back
+                </Button>
+                <Button
+                    data-testid="save-property-button"
+                    onClick={handleSubmit}
+                    className="flex-1 bg-gray-900 hover:bg-gray-800"
+                    disabled={submitting}
+                >
+                    {submitting ? (
+                        <>
+                            {"Saving"} <LoaderCircle className="animate-spin" />
+                        </>
+                    ) : property ? (
+                        "Update"
+                    ) : (
+                        "Submit"
+                    )}
+                </Button>
+            </div>
+        </div>
+    );
+}
