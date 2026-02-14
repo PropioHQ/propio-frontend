@@ -22,7 +22,7 @@ import { ExpenseCategory, ExpensePaymentMode } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Download, FileText, LoaderCircle, Upload, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Calendar } from "./ui/calendar";
@@ -35,6 +35,7 @@ export default function ExpenseFormDialog({
     onOpenChange,
     expenseId,
     propertyId,
+    prefill,
     onSuccess,
 }) {
     const [submitting, setSubmitting] = useState(false);
@@ -218,7 +219,6 @@ export default function ExpenseFormDialog({
         toast.info("Downloading file...");
         try {
             const url = await AttachmentService.downloadFile(fileId);
-            toast.success("File downloaded successfully");
 
             // open in separate tab
             window.open(url, "_blank");
@@ -243,20 +243,27 @@ export default function ExpenseFormDialog({
         toast.info("File will be deleted upon saving.");
     };
 
+    const isRecordDateYearOld = useMemo(() => {
+        if (!formData.record_date) return false;
+
+        return dayjs(formData.record_date).isBefore(new Date(), "year");
+    }, [formData.record_date]);
+
     useEffect(() => {
-        if (expense) {
+        const data = expense || prefill;
+        if (data) {
             setFormData({
-                record_date: new Date(expense.record_date),
-                category: expense.category,
-                amount: expense.amount,
-                payment_mode: expense.payment_mode,
-                vendor_name: expense.vendor_name,
-                note: expense.note || "",
+                record_date: new Date(data.record_date),
+                category: data.category,
+                amount: data.amount,
+                payment_mode: data.payment_mode,
+                vendor_name: data.vendor_name,
+                note: data.note || "",
             });
 
-            if (expense.attachments?.length) {
+            if (data.attachments?.length) {
                 setAttachments(
-                    expense.attachments.map((a) => ({
+                    data.attachments.map((a) => ({
                         _id: a._id,
                         label: a.label,
                         saved: true,
@@ -264,7 +271,7 @@ export default function ExpenseFormDialog({
                 );
             }
         }
-    }, [expense]);
+    }, [expense, prefill]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -317,10 +324,17 @@ export default function ExpenseFormDialog({
                                                 record_date: d,
                                             })
                                         }
-                                        defaultMonth={new Date()}
+                                        defaultMonth={
+                                            formData.record_date || new Date()
+                                        }
                                     />
                                 </PopoverContent>
                             </Popover>
+                            {isRecordDateYearOld ? (
+                                <p className="bg-yellow-50 text-yellow-900 mt-2 p-1 font-medium rounded-sm text-xs w-fit">
+                                    Note: Record date is older than current year
+                                </p>
+                            ) : null}
                         </div>
 
                         <div>
@@ -460,18 +474,23 @@ export default function ExpenseFormDialog({
                                             : "text-gray-400",
                                     )}
                                 />
-                                <p
-                                    className={cn(
-                                        "text-sm",
-                                        uploadingFile
-                                            ? "text-gray-900"
-                                            : "text-gray-600",
-                                    )}
-                                >
-                                    {uploadingFile
-                                        ? "Uploading..."
-                                        : "Drop file here or click to upload"}
-                                </p>
+                                {uploadingFile ? (
+                                    <p className="text-sm font-medium text-gray-900 mb-1">
+                                        Uploading...
+                                    </p>
+                                ) : (
+                                    <>
+                                        <p className="text-sm font-medium text-gray-900 mb-1">
+                                            Drop your document here
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            or click to browse
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-2">
+                                            PDF, PNG, JPG, or HEIC
+                                        </p>
+                                    </>
+                                )}
                             </div>
 
                             {attachments.length > 0 && (

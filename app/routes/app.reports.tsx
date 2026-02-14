@@ -11,7 +11,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { cn, convertToCSV, generateAndDownloadExcel } from "@/lib/utils";
+import useMetaTags from "@/lib/meta";
+import { cn, generateAndDownloadExcel } from "@/lib/utils";
 import { fadeRow } from "@/motionstyles";
 import { PROPERTIES_KEY, PROPERTIES_REPORTS } from "@/querykeys";
 import PropertyService from "@/services/property.service";
@@ -26,8 +27,12 @@ import {
     Wallet,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation, type MetaArgs, type MetaFunction } from "react-router";
 import { toast } from "sonner";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Reports" });
+};
 
 export default function Reports() {
     const location = useLocation();
@@ -350,7 +355,7 @@ export default function Reports() {
                                             <p className="text-[11px] text-gray-400">
                                                 Bookings
                                             </p>
-                                            <p className=" text-gray-900">
+                                            <p className=" text-gray-900 mt-1">
                                                 <AmountLabel
                                                     value={
                                                         s.total_bookings_value
@@ -362,7 +367,7 @@ export default function Reports() {
                                             <p className="text-[11px] text-gray-400">
                                                 Expenses
                                             </p>
-                                            <p className=" text-gray-900">
+                                            <p className=" text-gray-900 mt-1">
                                                 <AmountLabel
                                                     value={s.total_expenses}
                                                 />
@@ -372,7 +377,7 @@ export default function Reports() {
                                             <p className="text-[11px] text-gray-400">
                                                 Earnings
                                             </p>
-                                            <p className=" text-gray-900">
+                                            <p className=" text-gray-900 mt-1">
                                                 <AmountLabel
                                                     value={s.total_earnings}
                                                 />
@@ -385,7 +390,7 @@ export default function Reports() {
                                             {s.property_id ===
                                             selectedProperty ? (
                                                 <p
-                                                    className="text-brand font-medium"
+                                                    className="text-brand font-medium mt-1"
                                                     onClick={() =>
                                                         downloadReports(
                                                             s.property_id,
@@ -396,7 +401,7 @@ export default function Reports() {
                                                 </p>
                                             ) : (
                                                 <p
-                                                    className="text-brand font-medium"
+                                                    className="text-brand font-medium mt-1"
                                                     onClick={() =>
                                                         setSelectedProperty(
                                                             s.property_id,

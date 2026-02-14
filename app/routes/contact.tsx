@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import useMetaTags from "@/lib/meta";
 import {
     ArrowLeft,
     Clock,
@@ -10,8 +11,12 @@ import {
     Send,
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, type MetaArgs, type MetaFunction } from "react-router";
 import { toast } from "sonner";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Contact" });
+};
 
 export default function ContactPage() {
     const navigate = useNavigate();

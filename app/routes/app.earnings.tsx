@@ -1,9 +1,11 @@
 import AmountLabel from "@/components/amountlabel";
 import EarningFormDialog from "@/components/earningformdialog";
+import MonthYearPopover from "@/components/monthyearpopover";
 import PropertySelector from "@/components/propertyselector";
 import ScreenLoader from "@/components/screenloader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import useMetaTags from "@/lib/meta";
 import { cn } from "@/lib/utils";
 import { EARNINGS_KEY, PROPERTIES_KEY } from "@/querykeys";
 import EarningService from "@/services/earning.service";
@@ -12,7 +14,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
 import { Calendar, Edit, EllipsisVertical, Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import type { MetaArgs, MetaFunction } from "react-router";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Earnings" });
+};
 
 export default function Earnings() {
     const queryClient = useQueryClient();
@@ -21,8 +28,12 @@ export default function Earnings() {
     const [showDialog, setShowDialog] = useState(false);
     const [selectedEarning, setSelectedEarning] = useState("");
 
-    const currentYear: number = useMemo(() => dayjs().get("year"), []);
-    const currentMonth: number = useMemo(() => dayjs().get("month") + 1, []);
+    const [selectedYear, setSelectedYear] = useState<number>(() =>
+        dayjs().get("year"),
+    );
+    const [selectedMonth, setSelectedMonth] = useState<number>(
+        () => dayjs().get("month") + 1,
+    );
 
     const { data: properties = [], isLoading: propertiesLoading } = useQuery({
         queryKey: [PROPERTIES_KEY],
@@ -31,12 +42,12 @@ export default function Earnings() {
     });
 
     const { data: earnings = [], isLoading: earningsLoading } = useQuery({
-        queryKey: [EARNINGS_KEY, currentMonth, currentYear, selectedProperty],
+        queryKey: [EARNINGS_KEY, selectedMonth, selectedYear, selectedProperty],
         queryFn: () =>
             EarningService.getEarnings(
                 selectedProperty,
-                currentMonth,
-                currentYear,
+                selectedMonth,
+                selectedYear,
             ),
         staleTime: 5 * 60 * 1000, // 5 minutes
         enabled: !!selectedProperty && !propertiesLoading,
@@ -46,8 +57,8 @@ export default function Earnings() {
         queryClient.invalidateQueries({
             queryKey: [
                 EARNINGS_KEY,
-                currentMonth,
-                currentYear,
+                selectedMonth,
+                selectedYear,
                 selectedProperty,
             ],
         });
@@ -79,10 +90,6 @@ export default function Earnings() {
         }
     }, [properties]);
 
-    if (propertiesLoading || earningsLoading) {
-        return <ScreenLoader />;
-    }
-
     return (
         <div
             className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto"
@@ -92,13 +99,23 @@ export default function Earnings() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h1 className="text-3xl sm:text-4xl font-bold">Earnings</h1>
-                    <p className="text-gray-600 mt-1">
-                        {dayjs()
-                            .set("month", currentMonth - 1)
-                            .set("year", currentYear)
-                            .format("MMMM YYYY")}{" "}
-                        Overview
-                    </p>
+                    <div className="mt-1 flex flex-row gap-1.5 items-center text-gray-600">
+                        <MonthYearPopover
+                            month={selectedMonth}
+                            year={selectedYear}
+                            onMonthSelect={setSelectedMonth}
+                            onYearSelect={setSelectedYear}
+                        >
+                            <p className="underline decoration-dashed decoration-1 decoration decoration-gray-500 underline-offset-4 cursor-pointer">
+                                {dayjs()
+                                    .set("month", selectedMonth - 1)
+                                    .set("year", selectedYear)
+                                    .format("MMMM YYYY")}{" "}
+                            </p>
+                        </MonthYearPopover>
+
+                        <p>Overview</p>
+                    </div>
                 </div>
 
                 <div className="flex flex-row items-center gap-3">
@@ -106,8 +123,8 @@ export default function Earnings() {
                         data-testid="add-earning-dashboard-btn"
                         onClick={handleAddNew}
                     >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Earning
+                        <Plus className="w-4 h-4" />
+                        <span className="ml-2">Add</span>
                     </Button>
                     <PropertySelector
                         properties={properties}
@@ -118,7 +135,9 @@ export default function Earnings() {
             </div>
 
             <div className="bg-white" data-testid="earnings-list">
-                {earnings.length === 0 ? (
+                {propertiesLoading || earningsLoading ? (
+                    <ScreenLoader />
+                ) : earnings.length === 0 ? (
                     <div className="p-8 text-center text-gray-500 rounded-lg border border-gray-200">
                         No earnings recorded yet.
                     </div>
@@ -286,7 +305,7 @@ export default function Earnings() {
                                                 <p className="text-[11px] text-gray-400">
                                                     Net
                                                 </p>
-                                                <p className=" text-gray-900">
+                                                <p className=" text-gray-900 mt-1">
                                                     <AmountLabel
                                                         value={
                                                             earning.net_amount
@@ -299,7 +318,7 @@ export default function Earnings() {
                                                 <p className="text-[11px] text-gray-400">
                                                     TDS
                                                 </p>
-                                                <p className=" text-gray-900">
+                                                <p className=" text-gray-900 mt-1">
                                                     <AmountLabel
                                                         value={
                                                             earning.tds_value
@@ -312,7 +331,7 @@ export default function Earnings() {
                                                 <p className="text-[11px] text-gray-400">
                                                     GST
                                                 </p>
-                                                <p className=" text-gray-900">
+                                                <p className=" text-gray-900 mt-1">
                                                     <AmountLabel
                                                         value={
                                                             earning.gst_value

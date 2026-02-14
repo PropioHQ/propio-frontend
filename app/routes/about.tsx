@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
+import useMetaTags from "@/lib/meta";
 import { ArrowLeft, Heart, Target, Users, Zap } from "lucide-react";
+import type { MetaArgs, MetaFunction } from "react-router";
 import { useNavigate } from "react-router";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "About" });
+};
 
 export default function AboutPage() {
     const navigate = useNavigate();

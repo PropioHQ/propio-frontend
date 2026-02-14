@@ -1,4 +1,5 @@
 import API from "@/lib/api";
+import type { PropertyType } from "@/types";
 
 const PropertyService = {
     getProperty: async (propertyId: string) => {
@@ -36,6 +37,7 @@ const PropertyService = {
         state: string,
         country: string,
         role: string,
+        type: PropertyType,
     ) => {
         return await API.post("/api/v1/property", {
             name,
@@ -43,6 +45,7 @@ const PropertyService = {
             state,
             country,
             role,
+            type,
         });
     },
     updateProperty: async (
@@ -52,6 +55,7 @@ const PropertyService = {
         state: string,
         country: string,
         role: string,
+        type: PropertyType,
     ) => {
         return await API.put("/api/v1/property", {
             propertyId,
@@ -60,6 +64,7 @@ const PropertyService = {
             state,
             country,
             role,
+            type,
         });
     },
 };

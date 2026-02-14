@@ -8,13 +8,18 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import useMetaTags from "@/lib/meta";
 import { PROPERTIES_KEY } from "@/querykeys";
 import PropertyService from "@/services/property.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { MapPin, Plus } from "lucide-react";
+import { EllipsisVertical, MapPin, Plus } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, type MetaArgs, type MetaFunction } from "react-router";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Properties" });
+};
 
 export default function Properties() {
     const navigate = useNavigate();
@@ -57,7 +62,7 @@ export default function Properties() {
                     onClick={() => setIsDialogOpen(true)}
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    Add Property
+                    New Property
                 </Button>
             </div>
 
@@ -68,6 +73,9 @@ export default function Properties() {
                         <tr className="border-b bg-gray-50">
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                 Property Name
+                            </th>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                Type
                             </th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                 Location
@@ -93,6 +101,9 @@ export default function Properties() {
                             >
                                 <td className="px-4 py-4 text-sm text-gray-700">
                                     {property.name}
+                                </td>
+                                <td className="px-4 py-4 text-sm text-gray-700">
+                                    {property.type}
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-700 flex items-center gap-1.5">
                                     <MapPin className="w-4 h-4 shrink-0 text-gray-400" />
@@ -159,55 +170,78 @@ export default function Properties() {
                             ease: "easeOut",
                             delay: index * 0.03,
                         }}
-                        className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm"
+                        className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                     >
-                        <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-gray-900 mb-1 truncate">
+                        {/* Accent Strip */}
+                        <div className="absolute left-0 top-0 h-full w-1 bg-gray-900/80" />
+
+                        <div className="p-4">
+                            {/* Header Row */}
+                            <div className="flex items-start justify-between gap-3">
+                                <h3 className="font-semibold text-sm text-gray-900 truncate">
                                     {property.name}
                                 </h3>
-                                <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
-                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                    <span className="truncate">
-                                        {property.city}, {property.state}
-                                    </span>
+
+                                <div className="text-right">
+                                    {property.is_active ? (
+                                        <Badge variant="success">
+                                            • Active
+                                        </Badge>
+                                    ) : (
+                                        <Badge variant="destructive">
+                                            Inactive
+                                        </Badge>
+                                    )}
                                 </div>
                             </div>
-                            {property.is_active ? (
-                                <Badge variant="success">• Active</Badge>
-                            ) : (
-                                <Badge variant="destructive">Inactive</Badge>
-                            )}
-                        </div>
 
-                        <div className="flex gap-2">
-                            <Button
-                                data-testid={`reports-${property._id}`}
-                                onClick={() =>
-                                    navigate("/app/reports", {
-                                        state: {
-                                            propertyId: property._id,
-                                        },
-                                    })
-                                }
-                                variant="outline"
-                                size="sm"
-                                className="flex-1"
-                            >
-                                View Reports
-                            </Button>
-                            <Button
-                                data-testid={`edit-${property._id}`}
-                                onClick={() => {
-                                    setSelectedProperty(property);
-                                    setIsDialogOpen(true);
-                                }}
-                                variant="outline"
-                                size="sm"
-                                className="flex-1"
-                            >
-                                Edit
-                            </Button>
+                            {/* Breakdown Grid */}
+                            <div className="mt-4 grid grid-cols-10 gap-2 text-xs">
+                                <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                    <p className="text-[11px] text-gray-400">
+                                        Type
+                                    </p>
+                                    <p className="text-gray-900 line-clamp-2 mt-1">
+                                        {property.type}
+                                    </p>
+                                </div>
+                                <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                    <p className="text-[11px] text-gray-400">
+                                        City
+                                    </p>
+                                    <p className=" text-gray-900 line-clamp-2 mt-1">
+                                        {property.city}
+                                    </p>
+                                </div>
+                                <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                    <p className="text-[11px] text-gray-400">
+                                        Report
+                                    </p>
+                                    <p
+                                        className="text-brand font-medium mt-1"
+                                        onClick={() =>
+                                            navigate("/app/reports", {
+                                                state: {
+                                                    propertyId: property._id,
+                                                },
+                                            })
+                                        }
+                                    >
+                                        View
+                                    </p>
+                                </div>
+                                <Button
+                                    onClick={() => {
+                                        setSelectedProperty(property);
+                                        setIsDialogOpen(true);
+                                    }}
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Edit expense"
+                                >
+                                    <EllipsisVertical className="h-4 w-4 text-gray-700" />
+                                </Button>
+                            </div>
                         </div>
                     </motion.div>
                 ))}

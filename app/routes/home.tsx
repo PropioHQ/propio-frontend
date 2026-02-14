@@ -1,6 +1,7 @@
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
+import useMetaTags from "@/lib/meta";
 import { cn } from "@/lib/utils";
 import {
     ArrowRight,
@@ -20,18 +21,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
-import type { Route } from "./+types/home";
-
-export function meta({}: Route.MetaArgs) {
-    return [
-        { title: "Propio" },
-        {
-            name: "description",
-            content: "Financial OS for property management",
-        },
-    ];
-}
+import { Link, type MetaArgs, type MetaFunction } from "react-router";
 
 interface Feature {
     icon: LucideIcon;
@@ -50,11 +40,15 @@ interface HowItWorksStep {
 interface PricingPlan {
     name: string;
     price: string;
-    period: string;
-    properties: string;
+    period: "month" | "year" | "";
+    properties: number;
     popular: boolean;
     features: string[];
 }
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({});
+};
 
 export default function LandingPage() {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -88,7 +82,7 @@ export default function LandingPage() {
         {
             icon: DollarSign,
             title: "Track expenses",
-            desc: "Property-wise expenses with optional bill scanning (OCR).",
+            desc: "Property-wise expenses with optional bill scanning (Smart Scan).",
             color: "bg-purple-400",
         },
         {
@@ -121,7 +115,7 @@ export default function LandingPage() {
         {
             step: "2",
             title: "Log bookings & transactions",
-            desc: "Add a bookings, earnings, expenses, and scan bills with OCR.",
+            desc: "Add a bookings, earnings, expenses, and scan bills with Smart Scan.",
             icon: Zap,
         },
         {
@@ -135,54 +129,84 @@ export default function LandingPage() {
     const plans: PricingPlan[] = [
         {
             name: "Starter",
-            price: "Free",
-            period: "forever",
-            properties: "1 property",
+            price: "₹0",
+            period: "",
+            properties: 1,
             popular: false,
             features: [
-                "Unlimited bookings",
-                "Expense tracking",
-                "Monthly reports",
-                "PDF exports",
+                "1 Property",
+                "Bookings module",
+                "Earnings tracker",
+                "Expenses tracker",
+                "Vault for documents",
+                "10 Smart Scan credits (one-time)",
+                "Monthly summary view",
             ],
         },
         {
             name: "Growth",
-            price: "₹499",
-            period: "/month",
-            properties: "2-5 properties",
-            popular: true,
+            price: "₹699",
+            period: "month",
+            properties: 5,
+            popular: false,
             features: [
-                "Everything in Starter",
-                "OCR bill scanning",
-                "Priority support",
-                "Excel exports",
+                "Up to 5 Properties",
+                "Bookings (manual + Smart Scan)",
+                "Earnings & payout tracking",
+                "Expenses with Smart Scan (300 scans/month)",
+                "Automatic expense categorization",
+                "Compliance reminders",
+                "Downloadable reports",
+                "Team access (2 users)",
             ],
         },
         {
-            name: "Professional",
-            price: "₹899",
-            period: "/month",
-            properties: "5-10 properties",
+            name: "Pro",
+            price: "₹999",
+            period: "month",
+            properties: 12,
+            popular: true,
+            features: [
+                "Up to 12 Properties",
+                "Smart Scan (800 scans/month)",
+                "Advanced earnings insights",
+                "Seasonal expense comparison",
+                "Branded invoice & receipt sharing",
+                "Full compliance calendar",
+                "Natural language search",
+                "Team access (5 users)",
+            ],
+        },
+        {
+            name: "Master",
+            price: "₹1,799",
+            period: "month",
+            properties: 20,
             popular: false,
             features: [
-                "Everything in Growth",
-                "Custom receipts",
-                "Team access",
-                "API access",
+                "Up to 20 Properties",
+                "Extended Smart Scan (2,000 scans/month)",
+                "AI financial assistant",
+                "Cross-property performance insights",
+                "Expense-to-earning ratio analysis",
+                "Demand & location alerts",
+                "Unlimited team access",
+                "Priority onboarding support",
             ],
         },
         {
             name: "Enterprise",
-            price: "₹1499",
-            period: "/month",
-            properties: "10-20 properties",
+            price: "Custom",
+            period: "",
+            properties: 0,
             popular: false,
             features: [
-                "Everything in Pro",
-                "Dedicated support",
-                "Custom integrations",
-                "SLA guarantee",
+                "Unlimited properties",
+                "Custom Smart Scan limits",
+                "Dedicated account manager",
+                "Custom reporting & integrations",
+                "Service & compliance partnerships",
+                "SLA-backed support",
             ],
         },
     ];
@@ -902,12 +926,10 @@ export default function LandingPage() {
                                                 {plan.price}
                                             </span>
                                             <span className="text-slate-500 text-xs sm:text-sm">
+                                                {plan.period && "/"}
                                                 {plan.period}
                                             </span>
                                         </div>
-                                        <p className="text-xs sm:text-sm text-slate-600 mt-2">
-                                            {plan.properties}
-                                        </p>
                                     </div>
 
                                     <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">

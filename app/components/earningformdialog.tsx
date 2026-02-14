@@ -22,7 +22,7 @@ import { BookingSource } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Download, FileText, LoaderCircle, Upload, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Calendar } from "./ui/calendar";
@@ -222,7 +222,6 @@ export default function EarningFormDialog({
         toast.info("Downloading file...");
         try {
             const url = await AttachmentService.downloadFile(fileId);
-            toast.success("File downloaded successfully");
 
             // open in separate tab
             window.open(url, "_blank");
@@ -246,6 +245,12 @@ export default function EarningFormDialog({
         setAttachments([...attachments.filter((a) => a._id !== fileId)]);
         toast.info("File will be deleted upon saving.");
     };
+
+    const isRecordDateYearOld = useMemo(() => {
+        if (!formData.record_date) return false;
+
+        return dayjs(formData.record_date).isBefore(new Date(), "year");
+    }, [formData.record_date]);
 
     useEffect(() => {
         if (earning) {
@@ -322,10 +327,19 @@ export default function EarningFormDialog({
                                                     record_date: d,
                                                 })
                                             }
-                                            defaultMonth={new Date()}
+                                            defaultMonth={
+                                                formData.record_date ||
+                                                new Date()
+                                            }
                                         />
                                     </PopoverContent>
                                 </Popover>
+                                {isRecordDateYearOld ? (
+                                    <p className="bg-yellow-50 text-yellow-900 mt-2 p-1 font-medium rounded-sm text-xs w-fit">
+                                        Note: Record date is older than current
+                                        year
+                                    </p>
+                                ) : null}
                             </div>
                             <div>
                                 <Label>Earning source *</Label>
@@ -467,18 +481,23 @@ export default function EarningFormDialog({
                                             : "text-gray-400",
                                     )}
                                 />
-                                <p
-                                    className={cn(
-                                        "text-sm",
-                                        uploadingFile
-                                            ? "text-gray-900"
-                                            : "text-gray-600",
-                                    )}
-                                >
-                                    {uploadingFile
-                                        ? "Uploading..."
-                                        : "Drop file here or click to upload"}
-                                </p>
+                                {uploadingFile ? (
+                                    <p className="text-sm font-medium text-gray-900 mb-1">
+                                        Uploading...
+                                    </p>
+                                ) : (
+                                    <>
+                                        <p className="text-sm font-medium text-gray-900 mb-1">
+                                            Drop your document here
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            or click to browse
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-2">
+                                            PDF, PNG, JPG, or HEIC
+                                        </p>
+                                    </>
+                                )}
                             </div>
 
                             {attachments.length > 0 && (

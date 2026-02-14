@@ -14,12 +14,14 @@ import {
 } from "@/querykeys";
 import ConstantsService from "@/services/constants.service";
 import PropertyService from "@/services/property.service";
-import { UserRoles } from "@/types";
+import { PropertyType, UserRoles } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
+
+const PROPERTY_NAME_LENGTH = 60; // 60 characters
 
 export default function PropertyForm({ onBack, onSuccess, property = null }) {
     const queryClient = useQueryClient();
@@ -31,6 +33,7 @@ export default function PropertyForm({ onBack, onSuccess, property = null }) {
         state: "",
         country: "",
         role: UserRoles.OWNER,
+        type: PropertyType.APARTMENT,
     });
 
     const { data: countries = [] } = useQuery({
@@ -48,12 +51,19 @@ export default function PropertyForm({ onBack, onSuccess, property = null }) {
     });
 
     const handleSubmit = async () => {
-        let { name, city, state, country, role } = propertyData;
+        let { name, city, state, country, role, type } = propertyData;
         name = name.trim();
         city = city.trim();
 
-        if (!name || !city || !state || !country || !role) {
+        if (!name || !city || !state || !country || !role || !type) {
             toast.error("All fields are required");
+            return;
+        }
+
+        if (name.length > PROPERTY_NAME_LENGTH) {
+            toast.error(
+                `Max ${PROPERTY_NAME_LENGTH} characters are allowed for property name`,
+            );
             return;
         }
 
@@ -67,6 +77,7 @@ export default function PropertyForm({ onBack, onSuccess, property = null }) {
                     state,
                     country,
                     role,
+                    type,
                 );
             } else {
                 await PropertyService.addProperty(
@@ -75,6 +86,7 @@ export default function PropertyForm({ onBack, onSuccess, property = null }) {
                     state,
                     country,
                     role,
+                    type,
                 );
             }
 
@@ -111,6 +123,7 @@ export default function PropertyForm({ onBack, onSuccess, property = null }) {
                 state: property.state,
                 country: property.country,
                 role: property.role as UserRoles,
+                type: property.type as PropertyType,
             });
         }
     }, [property]);
@@ -133,6 +146,7 @@ export default function PropertyForm({ onBack, onSuccess, property = null }) {
                     }
                     required
                     className="mt-2 text-base"
+                    maxLength={PROPERTY_NAME_LENGTH}
                 />
             </div>
 
@@ -262,6 +276,38 @@ export default function PropertyForm({ onBack, onSuccess, property = null }) {
                         </SelectContent>
                     </Select>
                 </div>
+            </div>
+
+            <div>
+                <Label htmlFor="type">Property type *</Label>
+                <Select
+                    key={propertyData.type}
+                    value={propertyData.type}
+                    onValueChange={(value) =>
+                        setPropertyData({
+                            ...propertyData,
+                            type: value as PropertyType,
+                        })
+                    }
+                    required
+                >
+                    <SelectTrigger data-testid="type-select" className="mt-2">
+                        <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent
+                        position="popper"
+                        side="bottom"
+                        align="start"
+                        sideOffset={4}
+                        className="max-h-64 overflow-y-auto"
+                    >
+                        {Object.values(PropertyType).map((type) => (
+                            <SelectItem key={type} value={type}>
+                                {type}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             <div className="flex gap-3 pt-4">

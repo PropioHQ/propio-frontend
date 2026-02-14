@@ -1,7 +1,12 @@
 import PropertyForm from "@/components/propertyform";
 import { Button } from "@/components/ui/button";
+import useMetaTags from "@/lib/meta";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, type MetaArgs, type MetaFunction } from "react-router";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Onboarding" });
+};
 
 export default function Onboarding() {
     const navigate = useNavigate();

@@ -21,7 +21,7 @@ export function Footer() {
                                 className="h-7 w-auto"
                             />
                         </Link>
-                        <p className="text-slate-400 leading-relaxed max-w-sm mb-4 sm:mb-6 text-sm sm:text-base">
+                        <p className="text-slate-400 leading-relaxed max-w-sm mt-4 mb-4 sm:mb-6 text-sm sm:text-base">
                             Replace Excel with clarity. Simple property finance
                             tracking for homestay owners managing 3-25
                             properties.
@@ -72,22 +72,34 @@ export function Footer() {
                         </h4>
                         <div className="space-y-3 sm:space-y-4">
                             <a
-                                href="#"
+                                href="/privacy-policy"
                                 className="block text-slate-400 hover:text-white transition-colors duration-200 text-sm"
                             >
                                 Privacy Policy
                             </a>
                             <a
-                                href="#"
+                                href="/terms-and-conditions"
                                 className="block text-slate-400 hover:text-white transition-colors duration-200 text-sm"
                             >
                                 Terms of Service
                             </a>
                             <a
-                                href="#"
+                                href="/cookie-policy"
                                 className="block text-slate-400 hover:text-white transition-colors duration-200 text-sm"
                             >
                                 Cookie Policy
+                            </a>
+                            <a
+                                href="/payment-refund-policy"
+                                className="block text-slate-400 hover:text-white transition-colors duration-200 text-sm"
+                            >
+                                Payment & Refund Policy
+                            </a>
+                            <a
+                                href="/shipping-policy"
+                                className="block text-slate-400 hover:text-white transition-colors duration-200 text-sm"
+                            >
+                                Shipping Policy
                             </a>
                         </div>
                     </div>

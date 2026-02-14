@@ -62,6 +62,8 @@ const badgeVariants = cva(
                     "border-transparent bg-lime-50 text-lime-700 hover:bg-lime-200",
                 [ExpenseCategory.LEGAL_COMPLIANCE]:
                     "border-transparent bg-violet-50 text-violet-700 hover:bg-violet-200",
+                [ExpenseCategory.PROMOTION_MARKETING]:
+                    "border-transparent bg-emerald-50 text-emerald-700 hover:bg-emerald-200",
                 [ExpenseCategory.OTHERS]:
                     "border-transparent bg-gray-50 text-gray-700 hover:bg-gray-200",
             },

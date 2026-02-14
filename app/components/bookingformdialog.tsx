@@ -36,6 +36,7 @@ export default function BookingFormDialog({
     onOpenChange,
     bookingId,
     propertyId,
+    prefill,
     onSuccess,
 }) {
     const [submitting, setSubmitting] = useState(false);
@@ -249,7 +250,6 @@ export default function BookingFormDialog({
         toast.info("Downloading file...");
         try {
             const url = await AttachmentService.downloadFile(fileId);
-            toast.success("File downloaded successfully");
 
             // open in separate tab
             window.open(url, "_blank");
@@ -275,22 +275,24 @@ export default function BookingFormDialog({
     };
 
     useEffect(() => {
-        if (booking) {
+        const data = booking || prefill;
+
+        if (data) {
             setFormData({
-                check_in: new Date(booking.check_in),
-                check_out: new Date(booking.check_out),
-                amount: booking.amount,
-                booking_source: booking.booking_source,
-                guest_name: booking.guest_name,
-                guest_count: booking.guest_count,
-                payment_mode: booking.payment_mode,
-                note: booking.note || "",
+                check_in: new Date(data.check_in),
+                check_out: new Date(data.check_out),
+                amount: data.amount,
+                booking_source: data.booking_source,
+                guest_name: data.guest_name,
+                guest_count: data.guest_count,
+                payment_mode: data.payment_mode,
+                note: data.note || "",
                 generate_receipt: false,
             });
 
-            if (booking.attachments?.length) {
+            if (data.attachments?.length) {
                 setAttachments(
-                    booking.attachments.map((a) => ({
+                    data.attachments.map((a) => ({
                         _id: a._id,
                         label: a.label,
                         saved: true,
@@ -298,7 +300,7 @@ export default function BookingFormDialog({
                 );
             }
         }
-    }, [booking]);
+    }, [booking, prefill]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -352,7 +354,9 @@ export default function BookingFormDialog({
                                                     check_in: d,
                                                 })
                                             }
-                                            defaultMonth={new Date()}
+                                            defaultMonth={
+                                                formData.check_in || new Date()
+                                            }
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -391,7 +395,9 @@ export default function BookingFormDialog({
                                                     check_out: d,
                                                 })
                                             }
-                                            defaultMonth={new Date()}
+                                            defaultMonth={
+                                                formData.check_out || new Date()
+                                            }
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -542,44 +548,46 @@ export default function BookingFormDialog({
                         </div>
 
                         {/* Receipt Section */}
-                        {booking?.receipt_id ? (
-                            <div className="p-4 bg-blue-50 rounded-lg">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="w-5 h-5 text-blue-600" />
-                                        <span className="text-sm font-medium">
-                                            Booking Receipt
-                                        </span>
+                        {
+                            booking?.receipt_id ? (
+                                <div className="p-4 bg-blue-50 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="w-5 h-5 text-blue-600" />
+                                            <span className="text-sm font-medium">
+                                                Booking Receipt
+                                            </span>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="link"
+                                            onClick={() =>
+                                                handleFileDownload(
+                                                    booking.receipt_id,
+                                                )
+                                            }
+                                        >
+                                            <Download className="w-4 h-4 mr-1" />
+                                            Download
+                                        </Button>
                                     </div>
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="link"
-                                        onClick={() =>
-                                            handleFileDownload(
-                                                booking.receipt_id,
-                                            )
-                                        }
-                                    >
-                                        <Download className="w-4 h-4 mr-1" />
-                                        Download
-                                    </Button>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="flex items-center justify-between">
-                                <Label>Generate Receipt</Label>
-                                <Switch
-                                    checked={formData.generate_receipt}
-                                    onCheckedChange={(checked) =>
-                                        setFormData({
-                                            ...formData,
-                                            generate_receipt: checked,
-                                        })
-                                    }
-                                />
-                            </div>
-                        )}
+                            ) : null
+                            // TODO: Development pending
+                            // <div className="flex items-center justify-between">
+                            //     <Label>Generate Receipt</Label>
+                            //     <Switch
+                            //         checked={formData.generate_receipt}
+                            //         onCheckedChange={(checked) =>
+                            //             setFormData({
+                            //                 ...formData,
+                            //                 generate_receipt: checked,
+                            //             })
+                            //         }
+                            //     />
+                            // </div>
+                        }
 
                         {/* Attachments Section */}
                         <div>
@@ -605,18 +613,23 @@ export default function BookingFormDialog({
                                             : "text-gray-400",
                                     )}
                                 />
-                                <p
-                                    className={cn(
-                                        "text-sm",
-                                        uploadingFile
-                                            ? "text-gray-900"
-                                            : "text-gray-600",
-                                    )}
-                                >
-                                    {uploadingFile
-                                        ? "Uploading..."
-                                        : "Drop file here or click to upload"}
-                                </p>
+                                {uploadingFile ? (
+                                    <p className="text-sm font-medium text-gray-900 mb-1">
+                                        Uploading...
+                                    </p>
+                                ) : (
+                                    <>
+                                        <p className="text-sm font-medium text-gray-900 mb-1">
+                                            Drop your document here
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            or click to browse
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-2">
+                                            PDF, PNG, JPG, or HEIC
+                                        </p>
+                                    </>
+                                )}
                             </div>
 
                             {attachments.length > 0 && (

@@ -1,27 +1,42 @@
 import AmountLabel from "@/components/amountlabel";
 import ExpenseFormDialog from "@/components/expenseformdialog";
+import MonthYearPopover from "@/components/monthyearpopover";
 import PropertySelector from "@/components/propertyselector";
+import ScanFormDialog from "@/components/scanformdialog";
 import ScreenLoader from "@/components/screenloader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import useMetaTags from "@/lib/meta";
 import { EXPENSES_KEY, PROPERTIES_KEY } from "@/querykeys";
 import ExpenseService from "@/services/expense.service";
 import PropertyService from "@/services/property.service";
+import { Modules } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import { Calendar, Edit, EllipsisVertical, Plus, Store } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Calendar, Edit, EllipsisVertical, Plus, Scan } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { MetaArgs, MetaFunction } from "react-router";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Expenses" });
+};
 
 export default function Expenses() {
     const queryClient = useQueryClient();
 
     const [selectedProperty, setSelectedProperty] = useState("");
-    const [showDialog, setShowDialog] = useState(false);
+    const [addDialog, setAddDialog] = useState(false);
+    const [scanDialog, setScanDialog] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState("");
+    const [scannedExpense, setScannedExpense] = useState(null);
 
-    const currentYear: number = useMemo(() => dayjs().get("year"), []);
-    const currentMonth: number = useMemo(() => dayjs().get("month") + 1, []);
+    const [selectedYear, setSelectedYear] = useState<number>(() =>
+        dayjs().get("year"),
+    );
+    const [selectedMonth, setSelectedMonth] = useState<number>(
+        () => dayjs().get("month") + 1,
+    );
 
     const { data: properties = [], isLoading: propertiesLoading } = useQuery({
         queryKey: [PROPERTIES_KEY],
@@ -30,12 +45,12 @@ export default function Expenses() {
     });
 
     const { data: expenses = [], isLoading: expensesLoading } = useQuery({
-        queryKey: [EXPENSES_KEY, currentMonth, currentYear, selectedProperty],
+        queryKey: [EXPENSES_KEY, selectedMonth, selectedYear, selectedProperty],
         queryFn: () =>
             ExpenseService.getExpenses(
                 selectedProperty,
-                currentMonth,
-                currentYear,
+                selectedMonth,
+                selectedYear,
             ),
         staleTime: 5 * 60 * 1000, // 5 minutes
         enabled: !!selectedProperty && !propertiesLoading,
@@ -45,8 +60,8 @@ export default function Expenses() {
         queryClient.invalidateQueries({
             queryKey: [
                 EXPENSES_KEY,
-                currentMonth,
-                currentYear,
+                selectedMonth,
+                selectedYear,
                 selectedProperty,
             ],
         });
@@ -54,12 +69,23 @@ export default function Expenses() {
 
     const handleExpenseClick = (expenseId: string) => {
         setSelectedExpense(expenseId);
-        setShowDialog(true);
+        setAddDialog(true);
     };
 
     const handleAddNew = () => {
         setSelectedExpense("");
-        setShowDialog(true);
+        setAddDialog(true);
+    };
+
+    const handleScan = () => {
+        setSelectedExpense("");
+        setScanDialog(true);
+    };
+
+    const onScanSuccess = (data, attachment) => {
+        data.attachments = [attachment];
+        setScannedExpense(data);
+        setAddDialog(true);
     };
 
     useEffect(() => {
@@ -78,10 +104,6 @@ export default function Expenses() {
         }
     }, [properties]);
 
-    if (propertiesLoading || expensesLoading) {
-        return <ScreenLoader />;
-    }
-
     return (
         <div
             className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto"
@@ -91,21 +113,38 @@ export default function Expenses() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h1 className="text-3xl sm:text-4xl font-bold">Expenses</h1>
-                    <p className="text-gray-600 mt-1">
-                        {dayjs()
-                            .set("month", currentMonth - 1)
-                            .set("year", currentYear)
-                            .format("MMMM YYYY")}{" "}
-                        Overview
-                    </p>
+                    <div className="mt-1 flex flex-row gap-1.5 items-center text-gray-600">
+                        <MonthYearPopover
+                            month={selectedMonth}
+                            year={selectedYear}
+                            onMonthSelect={setSelectedMonth}
+                            onYearSelect={setSelectedYear}
+                        >
+                            <p className="underline decoration-dashed decoration-1 decoration decoration-gray-500 underline-offset-4 cursor-pointer">
+                                {dayjs()
+                                    .set("month", selectedMonth - 1)
+                                    .set("year", selectedYear)
+                                    .format("MMMM YYYY")}{" "}
+                            </p>
+                        </MonthYearPopover>
+
+                        <p>Overview</p>
+                    </div>
                 </div>
                 <div className="flex flex-row items-center gap-3">
                     <Button
                         data-testid="add-expense-button"
                         onClick={handleAddNew}
                     >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Expense
+                        <Plus className="w-4 h-4" />
+                        <span className="ml-2">Add</span>
+                    </Button>
+                    <Button
+                        data-testid="scan-expense-button"
+                        onClick={handleScan}
+                    >
+                        <Scan className="w-4 h-4" />
+                        <span className="ml-2">Scan</span>
                     </Button>
                     <PropertySelector
                         properties={properties}
@@ -116,7 +155,9 @@ export default function Expenses() {
             </div>
 
             <div className="bg-white" data-testid="expenses-list">
-                {expenses.length === 0 ? (
+                {propertiesLoading || expensesLoading ? (
+                    <ScreenLoader />
+                ) : expenses.length === 0 ? (
                     <div className="p-8 text-center text-gray-500 rounded-lg border border-gray-200">
                         No expenses recorded yet.
                     </div>
@@ -219,7 +260,7 @@ export default function Expenses() {
                                     whileTap={{ scale: 0.985 }}
                                     className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                                 >
-                                    {/* Amount Accent Strip */}
+                                    {/* Accent Strip */}
                                     <div className="absolute left-0 top-0 h-full w-1 bg-gray-900/80" />
 
                                     <div className="p-4">
@@ -255,25 +296,24 @@ export default function Expenses() {
 
                                         {/* Breakdown Grid */}
                                         <div className="mt-4 grid grid-cols-10 gap-2 text-xs">
-                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                            <div className="col-span-5 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
                                                 <p className="text-[11px] text-gray-400">
-                                                    Vendor
+                                                    Vendor name
                                                 </p>
-                                                <p className="text-gray-900">
+                                                <p className="text-gray-900 line-clamp-2 mt-1">
                                                     {expense.vendor_name ||
                                                         "Unknown"}
                                                 </p>
                                             </div>
 
-                                            <div className="col-span-3 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
+                                            <div className="col-span-4 rounded-lg border border-gray-100 bg-gray-50 p-2 text-center">
                                                 <p className="text-[11px] text-gray-400">
-                                                    Payment
+                                                    Payment mode
                                                 </p>
-                                                <p className=" text-gray-900">
+                                                <p className=" text-gray-900 mt-1">
                                                     {expense.payment_mode}
                                                 </p>
                                             </div>
-                                            <div className="col-span-3" />
                                             <Button
                                                 onClick={() =>
                                                     handleExpenseClick(
@@ -295,16 +335,27 @@ export default function Expenses() {
                 )}
             </div>
 
-            {showDialog ? (
+            {addDialog ? (
                 <ExpenseFormDialog
-                    open={showDialog}
-                    onOpenChange={setShowDialog}
+                    open={addDialog}
+                    onOpenChange={setAddDialog}
                     expenseId={selectedExpense}
                     propertyId={selectedProperty}
+                    prefill={scannedExpense}
                     onSuccess={() => {
                         refreshExpenses();
                         setSelectedExpense(null);
+                        setScannedExpense(null);
                     }}
+                />
+            ) : null}
+            {scanDialog ? (
+                <ScanFormDialog
+                    open={scanDialog}
+                    onOpenChange={setScanDialog}
+                    propertyId={selectedProperty}
+                    onSuccess={onScanSuccess}
+                    module={Modules.EXPENSE}
                 />
             ) : null}
         </div>

@@ -6,6 +6,7 @@ import { PROPERTY_COUNT_KEY } from "@/querykeys";
 import PropertyService from "@/services/property.service";
 import { useQuery } from "@tanstack/react-query";
 import {
+    Archive,
     Building2,
     ChevronLeft,
     ChevronRight,
@@ -50,6 +51,11 @@ const NavItems = [
         path: "/app/reports",
         icon: FileText,
         label: "Reports",
+    },
+    {
+        path: "/app/vault",
+        icon: Archive,
+        label: "Vault",
     },
 ];
 

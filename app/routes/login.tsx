@@ -3,11 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/auth.context";
+import useMetaTags from "@/lib/meta";
 import AuthService from "@/services/auth.service";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import {
+    Link,
+    useLocation,
+    useNavigate,
+    type MetaArgs,
+    type MetaFunction,
+} from "react-router";
 import { toast } from "sonner";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Authentication" });
+};
 
 export default function Login() {
     const location = useLocation();
@@ -24,6 +35,7 @@ export default function Login() {
         email: "",
         otp: "",
         authId: "",
+        inviteCode: "",
     });
 
     const responseHandler = async (
@@ -69,11 +81,13 @@ export default function Login() {
                     formData.otp,
                 );
             } else {
-                // TODO: Temporary disable
-                toast.info(
-                    "Onboarding of new user is paused. Please contact support.",
-                );
-                return;
+                // TODO: Temporary invitation code check
+                if (formData.inviteCode?.toUpperCase() !== "AIEXPO26") {
+                    toast.info(
+                        "Onboarding of new user is paused. Please contact support.",
+                    );
+                    return;
+                }
 
                 response = await AuthService.signupWithEmail(
                     formData.name,
@@ -146,7 +160,7 @@ export default function Login() {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {!isLogin && (
                             <div>
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name">Name *</Label>
                                 <Input
                                     id="name"
                                     data-testid="name-input"
@@ -160,12 +174,13 @@ export default function Login() {
                                         })
                                     }
                                     className="mt-1"
+                                    disabled={loading}
                                 />
                             </div>
                         )}
 
                         <div>
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="email">Email *</Label>
                             <Input
                                 id="email"
                                 data-testid="email-input"
@@ -179,8 +194,32 @@ export default function Login() {
                                     })
                                 }
                                 className="mt-1"
+                                disabled={Boolean(loading || formData.authId)}
                             />
                         </div>
+
+                        {!isLogin && (
+                            <div>
+                                <Label htmlFor="invitecode">
+                                    Invite Code *
+                                </Label>
+                                <Input
+                                    id="invitecode"
+                                    data-testid="invite-code-input"
+                                    type="text"
+                                    required
+                                    value={formData.inviteCode}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            inviteCode: e.target.value,
+                                        })
+                                    }
+                                    className="mt-1"
+                                    disabled={loading}
+                                />
+                            </div>
+                        )}
 
                         {formData.authId ? (
                             <div>
@@ -199,8 +238,8 @@ export default function Login() {
                                             otp: e.target.value,
                                         })
                                     }
-                                    disabled={loading}
                                     className="mt-1"
+                                    disabled={loading}
                                 />
                             </div>
                         ) : null}

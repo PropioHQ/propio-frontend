@@ -1,3 +1,9 @@
+export enum Modules {
+    EXPENSE = "Expense",
+    EARNING = "Earning",
+    BOOKING = "Booking",
+}
+
 export enum UserRoles {
     OWNER = "Owner",
     HOST = "Host",
@@ -44,5 +50,20 @@ export enum ExpenseCategory {
     PROPERTY_MAINTENANCE = "Property Maintenance",
     SOCIETY_MAINTENANCE = "Society Maintenance",
     LEGAL_COMPLIANCE = "Legal & Compliance",
+    PROMOTION_MARKETING = "Promotion & Marketing",
     OTHERS = "Others",
+}
+
+export enum PropertyType {
+    APARTMENT = "Apartment",
+    VILLA = "Villa",
+    GLAMPING = "Glamping",
+    INDEPENDENT_HOUSE = "Independent House",
+    PRIVATE_ROOM = "Private Room",
+    SHARED_ROOM = "Shared Room",
+    HOTEL = "Hotel",
+    GUESTHOUSE = "Guesthouse",
+    HOMESTAY = "Homestay",
+    FARMSTAY = "Farmstay",
+    OTHER = "Other",
 }

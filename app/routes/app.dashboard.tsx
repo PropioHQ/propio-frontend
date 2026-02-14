@@ -4,6 +4,7 @@ import PropertySelector from "@/components/propertyselector";
 import ReportSectionCard from "@/components/reportsectioncard";
 import ScreenLoader from "@/components/screenloader";
 import { Button } from "@/components/ui/button";
+import useMetaTags from "@/lib/meta";
 import { cn } from "@/lib/utils";
 import { fadeRow } from "@/motionstyles";
 import { PROPERTIES_KEY, PROPERTIES_REPORTS } from "@/querykeys";
@@ -21,6 +22,11 @@ import {
     Wallet,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import type { MetaArgs, MetaFunction } from "react-router";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Dashboard" });
+};
 
 const SummaryCard = ({
     icon: Icon,
@@ -136,7 +142,7 @@ export default function Dashboard() {
                     </p>
                 </div>
 
-                <div className="flex flex-row gap-4">
+                <div className="max-sm:w-full flex flex-row gap-4">
                     <PropertySelector
                         properties={[
                             { _id: "ALL", name: "All Properties" },

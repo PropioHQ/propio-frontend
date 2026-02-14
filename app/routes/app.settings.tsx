@@ -1,8 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth.context";
+import useMetaTags from "@/lib/meta";
 import { LogOut } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, type MetaArgs, type MetaFunction } from "react-router";
 import { toast } from "sonner";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Settings" });
+};
 
 export default function Settings() {
     const navigate = useNavigate();

@@ -1,34 +1,42 @@
 import AmountLabel from "@/components/amountlabel";
 import BookingFormDialog from "@/components/bookingformdialog";
+import MonthYearPopover from "@/components/monthyearpopover";
 import PropertySelector from "@/components/propertyselector";
+import ScanFormDialog from "@/components/scanformdialog";
 import ScreenLoader from "@/components/screenloader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import useMetaTags from "@/lib/meta";
 import { BOOKINGS_KEY, PROPERTIES_KEY } from "@/querykeys";
 import BookingService from "@/services/booking.service";
 import PropertyService from "@/services/property.service";
+import { Modules } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import {
-    Calendar,
-    CalendarRange,
-    Edit,
-    EllipsisVertical,
-    Plus,
-    Users,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Edit, EllipsisVertical, Plus, Scan } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { MetaArgs, MetaFunction } from "react-router";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Bookings" });
+};
 
 export default function Bookings() {
     const queryClient = useQueryClient();
 
     const [selectedProperty, setSelectedProperty] = useState("");
-    const [showDialog, setShowDialog] = useState(false);
+    const [addDialog, setAddDialog] = useState(false);
+    const [scanDialog, setScanDialog] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState("");
+    const [scannedBooking, setScannedBooking] = useState(null);
 
-    const currentYear: number = useMemo(() => dayjs().get("year"), []);
-    const currentMonth: number = useMemo(() => dayjs().get("month") + 1, []);
+    const [selectedYear, setSelectedYear] = useState<number>(() =>
+        dayjs().get("year"),
+    );
+    const [selectedMonth, setSelectedMonth] = useState<number>(
+        () => dayjs().get("month") + 1,
+    );
 
     const { data: properties = [], isLoading: propertiesLoading } = useQuery({
         queryKey: [PROPERTIES_KEY],
@@ -37,12 +45,12 @@ export default function Bookings() {
     });
 
     const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
-        queryKey: [BOOKINGS_KEY, currentMonth, currentYear, selectedProperty],
+        queryKey: [BOOKINGS_KEY, selectedMonth, selectedYear, selectedProperty],
         queryFn: () =>
             BookingService.getBookings(
                 selectedProperty,
-                currentMonth,
-                currentYear,
+                selectedMonth,
+                selectedYear,
             ),
         staleTime: 5 * 60 * 1000, // 5 minutes
         enabled: !!selectedProperty && !propertiesLoading,
@@ -52,8 +60,8 @@ export default function Bookings() {
         queryClient.invalidateQueries({
             queryKey: [
                 BOOKINGS_KEY,
-                currentMonth,
-                currentYear,
+                selectedMonth,
+                selectedYear,
                 selectedProperty,
             ],
         });
@@ -61,12 +69,23 @@ export default function Bookings() {
 
     const handleBookingClick = (bookingId: string) => {
         setSelectedBooking(bookingId);
-        setShowDialog(true);
+        setAddDialog(true);
     };
 
     const handleAddNew = () => {
         setSelectedBooking("");
-        setShowDialog(true);
+        setAddDialog(true);
+    };
+
+    const handleScan = () => {
+        setSelectedBooking("");
+        setScanDialog(true);
+    };
+
+    const onScanSuccess = (data, attachment) => {
+        data.attachments = [attachment];
+        setScannedBooking(data);
+        setAddDialog(true);
     };
 
     useEffect(() => {
@@ -85,10 +104,6 @@ export default function Bookings() {
         }
     }, [properties]);
 
-    if (propertiesLoading || bookingsLoading) {
-        return <ScreenLoader />;
-    }
-
     return (
         <div
             className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto"
@@ -98,13 +113,23 @@ export default function Bookings() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h1 className="text-3xl sm:text-4xl font-bold">Bookings</h1>
-                    <p className="text-gray-600 mt-1">
-                        {dayjs()
-                            .set("month", currentMonth - 1)
-                            .set("year", currentYear)
-                            .format("MMMM YYYY")}{" "}
-                        Overview
-                    </p>
+                    <div className="mt-1 flex flex-row gap-1.5 items-center text-gray-600">
+                        <MonthYearPopover
+                            month={selectedMonth}
+                            year={selectedYear}
+                            onMonthSelect={setSelectedMonth}
+                            onYearSelect={setSelectedYear}
+                        >
+                            <p className="underline decoration-dashed decoration-1 decoration decoration-gray-500 underline-offset-4 cursor-pointer">
+                                {dayjs()
+                                    .set("month", selectedMonth - 1)
+                                    .set("year", selectedYear)
+                                    .format("MMMM YYYY")}{" "}
+                            </p>
+                        </MonthYearPopover>
+
+                        <p>Overview</p>
+                    </div>
                 </div>
 
                 <div className="flex flex-row items-center gap-3">
@@ -113,7 +138,14 @@ export default function Bookings() {
                         onClick={handleAddNew}
                     >
                         <Plus className="w-4 h-4 mr-2" />
-                        Add Booking
+                        Add
+                    </Button>
+                    <Button
+                        data-testid="scan-expense-button"
+                        onClick={handleScan}
+                    >
+                        <Scan className="w-4 h-4 mr-2" />
+                        Scan
                     </Button>
                     <PropertySelector
                         properties={properties}
@@ -124,7 +156,9 @@ export default function Bookings() {
             </div>
 
             <div className="bg-white" data-testid="bookings-list">
-                {bookings.length === 0 ? (
+                {propertiesLoading || bookingsLoading ? (
+                    <ScreenLoader />
+                ) : bookings.length === 0 ? (
                     <div className="p-8 text-center text-gray-500 rounded-lg border border-gray-200">
                         No bookings recorded yet.
                     </div>
@@ -283,7 +317,7 @@ export default function Bookings() {
                                                 <p className="text-[11px] text-gray-400">
                                                     Guest
                                                 </p>
-                                                <p className="text-gray-900 truncate">
+                                                <p className="text-gray-900 truncate mt-1">
                                                     {
                                                         booking.guest_name.split(
                                                             " ",
@@ -295,7 +329,7 @@ export default function Bookings() {
                                                 <p className="text-[11px] text-gray-400">
                                                     Check-in
                                                 </p>
-                                                <p className=" text-gray-900">
+                                                <p className=" text-gray-900 mt-1">
                                                     {dayjs(
                                                         booking.check_in,
                                                     ).format("Do MMM")}
@@ -305,7 +339,7 @@ export default function Bookings() {
                                                 <p className="text-[11px] text-gray-400">
                                                     Check-out
                                                 </p>
-                                                <p className=" text-gray-900">
+                                                <p className=" text-gray-900 mt-1">
                                                     {dayjs(
                                                         booking.check_out,
                                                     ).format("Do MMM")}
@@ -332,16 +366,27 @@ export default function Bookings() {
                 )}
             </div>
 
-            {showDialog ? (
+            {addDialog ? (
                 <BookingFormDialog
-                    open={showDialog}
-                    onOpenChange={setShowDialog}
+                    open={addDialog}
+                    onOpenChange={setAddDialog}
                     bookingId={selectedBooking}
                     propertyId={selectedProperty}
+                    prefill={scannedBooking}
                     onSuccess={() => {
                         refreshBookings();
                         setSelectedBooking(null);
+                        setScannedBooking(null);
                     }}
+                />
+            ) : null}
+            {scanDialog ? (
+                <ScanFormDialog
+                    open={scanDialog}
+                    onOpenChange={setScanDialog}
+                    propertyId={selectedProperty}
+                    onSuccess={onScanSuccess}
+                    module={Modules.BOOKING}
                 />
             ) : null}
         </div>
