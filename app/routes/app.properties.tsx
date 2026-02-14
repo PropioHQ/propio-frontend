@@ -11,7 +11,7 @@ import {
 import useMetaTags from "@/lib/meta";
 import { PROPERTIES_KEY } from "@/querykeys";
 import PropertyService from "@/services/property.service";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { EllipsisVertical, MapPin, Plus } from "lucide-react";
 import { useState } from "react";
@@ -23,7 +23,6 @@ export const meta: MetaFunction<MetaArgs> = () => {
 
 export default function Properties() {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedProperty, setSelectedProperty] = useState(null);
@@ -35,10 +34,6 @@ export default function Properties() {
 
     const onSuccess = async () => {
         setIsDialogOpen(false);
-
-        queryClient.invalidateQueries({
-            queryKey: [PROPERTIES_KEY],
-        });
     };
 
     if (propertiesLoading) {

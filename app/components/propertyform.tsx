@@ -10,6 +10,7 @@ import {
 import {
     COUNTRIES_KEY,
     COUNTRY_STATES_KEY,
+    PROPERTIES_KEY,
     PROPERTY_COUNT_KEY,
 } from "@/querykeys";
 import ConstantsService from "@/services/constants.service";
@@ -93,6 +94,10 @@ export default function PropertyForm({ onBack, onSuccess, property = null }) {
             // Refresh property count
             queryClient.invalidateQueries({
                 queryKey: [PROPERTY_COUNT_KEY],
+            });
+            // Refresh property entries
+            queryClient.invalidateQueries({
+                queryKey: [PROPERTIES_KEY],
             });
 
             toast.success("Property added successfully!");

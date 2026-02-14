@@ -63,7 +63,9 @@ export default function AppLayout() {
     const { status, logout } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
+
     const [collapsed, setCollapsed] = useState(false);
+    const [initialized, setInitialized] = useState(false);
 
     const isOnboardingPage = useMemo(
         () => location.pathname.includes("/app/onboarding"),
@@ -96,10 +98,12 @@ export default function AppLayout() {
         if (!isOnboardingPage && propertyCount === 0) {
             navigate("/app/onboarding", { replace: true });
         }
+
+        setInitialized(true);
     }, [isLoading, propertyCount, isOnboardingPage]);
 
     // Show loading only during initial check
-    if (status === "loading" || isLoading) {
+    if (status === "loading" || isLoading || !initialized) {
         return <ScreenLoader />;
     }
 
@@ -110,7 +114,7 @@ export default function AppLayout() {
     // User is authenticated - render protected content
     return (
         <div className="min-h-screen flex flex-col md:flex-row">
-            {!isOnboardingPage ? (
+            {!isOnboardingPage && !isLoading ? (
                 <>
                     {/* Desktop Sidebar */}
                     <aside

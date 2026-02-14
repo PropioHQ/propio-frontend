@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/auth.context";
 import useMetaTags from "@/lib/meta";
+import { isValidEmail } from "@/lib/utils";
 import AuthService from "@/services/auth.service";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -69,17 +70,28 @@ export default function Login() {
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
+
+        const { name, email, otp, authId } = formData;
+        if (!email) {
+            return toast.error("Please enter your email");
+        }
+        if (authId && !otp) {
+            return toast.error("Please enter the OTP");
+        }
+        if (!isLogin && !name) {
+            return toast.error("Please enter your name");
+        }
+        if (!isValidEmail(email)) {
+            return toast.error("Please enter a valid email");
+        }
+
         setLoading(true);
 
         try {
             let response = null;
 
             if (isLogin) {
-                response = await AuthService.loginWithEmail(
-                    formData.email,
-                    formData.authId,
-                    formData.otp,
-                );
+                response = await AuthService.loginWithEmail(email, authId, otp);
             } else {
                 // TODO: Temporary invitation code check
                 if (formData.inviteCode?.toUpperCase() !== "AIEXPO26") {
@@ -90,10 +102,10 @@ export default function Login() {
                 }
 
                 response = await AuthService.signupWithEmail(
-                    formData.name,
-                    formData.email,
-                    formData.authId,
-                    formData.otp,
+                    name,
+                    email,
+                    authId,
+                    otp,
                 );
             }
 
@@ -126,7 +138,9 @@ export default function Login() {
     // Redirect if already authenticated
     useEffect(() => {
         if (status === "authenticated") {
-            navigate("/app/dashboard", { replace: true });
+            navigate(isLogin ? "/app/dashboard" : "/app/onboarding", {
+                replace: true,
+            });
         }
     }, [status, navigate]);
 

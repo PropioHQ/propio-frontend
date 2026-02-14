@@ -19,6 +19,14 @@ export function removeAuthToken() {
     window.localStorage.removeItem("x-a-token");
 }
 
+export function isValidEmail(email: string) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    if (typeof email !== "string") return false;
+
+    return emailRegex.test(email.trim());
+}
+
 export function convertToCSV(rows = []) {
     if (!rows || !rows.length) return "";
 
