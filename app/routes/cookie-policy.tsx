@@ -1,5 +1,10 @@
+import useMetaTags from "@/lib/meta";
 import { ChevronLeft } from "lucide-react";
-import { Link } from "react-router";
+import { Link, type MetaArgs, type MetaFunction } from "react-router";
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({ title: "Cookie Policy" });
+};
 
 const CookiePolicy = () => {
     // Configuration object for easy editing

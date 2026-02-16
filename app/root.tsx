@@ -9,11 +9,14 @@ import {
     Outlet,
     Scripts,
     ScrollRestoration,
+    type MetaArgs,
+    type MetaFunction,
 } from "react-router";
 import type { Route } from "./+types/root";
 import ScreenLoader from "./components/screenloader";
 import { AuthProvider } from "./contexts/auth.context";
 import "./index.css";
+import useMetaTags from "./lib/meta";
 dayjs.extend(advancedFormat);
 
 // Create a client
@@ -26,6 +29,10 @@ const queryClient = new QueryClient({
         },
     },
 });
+
+export const meta: MetaFunction<MetaArgs> = () => {
+    return useMetaTags({});
+};
 
 export const links: Route.LinksFunction = () => [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },

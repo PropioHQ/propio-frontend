@@ -113,17 +113,17 @@ export default function AppLayout() {
 
     // User is authenticated - render protected content
     return (
-        <div className="min-h-screen flex flex-col md:flex-row">
+        <div className="h-screen flex flex-col md:flex-row">
             {!isOnboardingPage && !isLoading ? (
                 <>
                     {/* Desktop Sidebar */}
                     <aside
                         className={cn(
-                            "hidden md:flex md:flex-col bg-white border-r border-gray-200 transition-all duration-300 relative",
+                            "hidden md:flex md:flex-col relative bg-white border-r border-gray-200 transition-all duration-300",
                             collapsed ? "w-20" : "w-64",
                         )}
                     >
-                        <div className="p-6 flex items-center gap-2">
+                        <div className="p-6 flex items-center gap-1">
                             <img
                                 src={
                                     collapsed
@@ -134,6 +134,9 @@ export default function AppLayout() {
                                     "rounded-full": collapsed,
                                 })}
                             />
+                            <p className="mb-4 text-xs text-gray-500 font-medium">
+                                beta
+                            </p>
                         </div>
 
                         <button
@@ -235,7 +238,7 @@ export default function AppLayout() {
             ) : null}
 
             {/* Main Content */}
-            <main className="flex-1 pb-20 md:pb-0 relative">
+            <main className="flex-1 pb-20 md:pb-0 relative max-h-screen overflow-auto">
                 <Outlet />
             </main>
         </div>
