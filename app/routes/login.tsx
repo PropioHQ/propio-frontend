@@ -36,7 +36,6 @@ export default function Login() {
         email: "",
         otp: "",
         authId: "",
-        inviteCode: "",
     });
 
     const responseHandler = async (
@@ -93,14 +92,6 @@ export default function Login() {
             if (isLogin) {
                 response = await AuthService.loginWithEmail(email, authId, otp);
             } else {
-                // TODO: Temporary invitation code check
-                if (formData.inviteCode?.toUpperCase() !== "AIEXPO26") {
-                    toast.info(
-                        "Onboarding of new user is paused. Please contact support.",
-                    );
-                    return;
-                }
-
                 response = await AuthService.signupWithEmail(
                     name,
                     email,
@@ -211,29 +202,6 @@ export default function Login() {
                                 disabled={Boolean(loading || formData.authId)}
                             />
                         </div>
-
-                        {!isLogin && (
-                            <div>
-                                <Label htmlFor="invitecode">
-                                    Invite Code *
-                                </Label>
-                                <Input
-                                    id="invitecode"
-                                    data-testid="invite-code-input"
-                                    type="text"
-                                    required
-                                    value={formData.inviteCode}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            inviteCode: e.target.value,
-                                        })
-                                    }
-                                    className="mt-1"
-                                    disabled={loading}
-                                />
-                            </div>
-                        )}
 
                         {formData.authId ? (
                             <div>
