@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { motion } from "motion/react";
 import dayjs from "dayjs";
+import { Mail } from "lucide-react";
 
 export function Footer() {
     const currentYear = dayjs().get("year");
@@ -26,9 +27,14 @@ export function Footer() {
                             tracking for homestay owners managing 3-25
                             properties.
                         </p>
-                        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span>All systems operational</span>
+                        <div className="text-sm flex flex-row items-center gap-1.5">
+                            <Mail className="w-4 h-4" />
+                            <a
+                                href="mailto:support@propiohq.com"
+                                className="hover:underline"
+                            >
+                                support@propiohq.com
+                            </a>
                         </div>
                     </div>
 

@@ -8,7 +8,6 @@ import {
 export default [
     index("routes/home.tsx"),
     route("/about", "routes/about.tsx"),
-    route("/contact", "routes/contact.tsx"),
     route("/signin", "routes/login.tsx", { id: "signin" }),
     route("/signup", "routes/login.tsx", { id: "signup" }),
     route("/privacy-policy", "routes/privacy-policy.tsx"),
@@ -27,6 +26,5 @@ export default [
         route("/app/properties", "routes/app.properties.tsx"),
         route("/app/reports", "routes/app.reports.tsx"),
         route("/app/vault", "routes/app.vault.tsx"),
-        route("/app/settings", "routes/app.settings.tsx"),
     ]),
 ] satisfies RouteConfig;

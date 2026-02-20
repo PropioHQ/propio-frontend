@@ -7,7 +7,6 @@ export default {
     prerender: [
         "/",
         "/about",
-        "/contact",
         "/signin",
         "/signup",
         "/privacy-policy",

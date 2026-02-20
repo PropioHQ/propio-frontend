@@ -30,12 +30,6 @@ export default function AboutPage() {
                         </span>
                     </button>
                     <div className="flex items-center gap-6">
-                        <button
-                            onClick={() => navigate("/contact")}
-                            className="text-gray-600 hover:text-gray-900 transition-colors"
-                        >
-                            Contact
-                        </button>
                         <Button
                             onClick={() => navigate("/signin")}
                             className="bg-gray-900 hover:bg-gray-800 shadow-lg"
@@ -225,12 +219,6 @@ export default function AboutPage() {
                                 className="text-gray-400 hover:text-white transition-colors"
                             >
                                 Home
-                            </button>
-                            <button
-                                onClick={() => navigate("/contact")}
-                                className="text-gray-400 hover:text-white transition-colors"
-                            >
-                                Contact
                             </button>
                             <a
                                 href="#"
