@@ -2,6 +2,7 @@ export enum Modules {
     EXPENSE = "Expense",
     EARNING = "Earning",
     BOOKING = "Booking",
+    DOCSTORAGE = "Document Storage",
 }
 
 export enum UserRoles {
@@ -65,5 +66,25 @@ export enum PropertyType {
     GUESTHOUSE = "Guesthouse",
     HOMESTAY = "Homestay",
     FARMSTAY = "Farmstay",
+    OTHER = "Other",
+}
+
+export enum AgentTaskStatus {
+    PROCESSING = "PROCESSING",
+    COMPLETED = "COMPLETED",
+    FAILED = "FAILED",
+}
+
+export enum DocumentType {
+    AGREEMENT = "Agreement",
+    LEASE_AGREEMENT = "Lease Agreement",
+    PLATFORM_AGREEMENT = "Platform Agreement",
+    RENTAL_AGREEMENT = "Rental Agreement",
+    NOC = "NOC (No Objection Certificate)",
+    PURCHASE_DOCUMENT = "Purchase Document",
+    NOTICE = "Notice",
+    LEGAL_NOTICE = "Legal Notice",
+    IDENTITY_DOCUMENT = "Identity Document",
+    PROPERTY_DOCUMENT = "Property Document",
     OTHER = "Other",
 }

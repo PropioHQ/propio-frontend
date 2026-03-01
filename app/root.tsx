@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
+import { useEffect } from "react";
 import {
     isRouteErrorResponse,
     Links,
@@ -17,6 +18,7 @@ import ScreenLoader from "./components/screenloader";
 import { AuthProvider } from "./contexts/auth.context";
 import "./index.css";
 import useMetaTags from "./lib/meta";
+import { loadDynamicScript } from "./lib/utils";
 dayjs.extend(advancedFormat);
 
 // Create a client
@@ -48,6 +50,10 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+    useEffect(() => {
+        loadDynamicScript("/assets/clarity.js");
+    }, []);
+
     return (
         <html lang="en">
             <head>

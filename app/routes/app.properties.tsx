@@ -13,7 +13,13 @@ import { PROPERTIES_KEY } from "@/querykeys";
 import PropertyService from "@/services/property.service";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { EllipsisVertical, MapPin, Plus } from "lucide-react";
+import {
+    ArrowRight,
+    Ellipsis,
+    EllipsisVertical,
+    MapPin,
+    Plus,
+} from "lucide-react";
 import { useState } from "react";
 import { useNavigate, type MetaArgs, type MetaFunction } from "react-router";
 
@@ -78,6 +84,9 @@ export default function Properties() {
                             <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
                                 Status
                             </th>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                Report
+                            </th>
                             <th className="px-4 py-3"></th>
                         </tr>
                     </thead>
@@ -107,7 +116,7 @@ export default function Properties() {
                                     </span>
                                 </td>
                                 <td className="px-4 py-4 text-center text-gray-700">
-                                    {property.is_active ? (
+                                    {property.isActive ? (
                                         <Badge variant="success">
                                             • Active
                                         </Badge>
@@ -118,34 +127,34 @@ export default function Properties() {
                                     )}
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-700">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <Button
-                                            data-testid={`reports-${property._id}`}
-                                            onClick={() =>
-                                                navigate("/app/reports", {
-                                                    state: {
-                                                        propertyId:
-                                                            property._id,
-                                                    },
-                                                })
-                                            }
-                                            variant="outline"
-                                            size="sm"
-                                        >
-                                            View Reports
-                                        </Button>
-                                        <Button
-                                            data-testid={`edit-${property._id}`}
-                                            onClick={() => {
-                                                setSelectedProperty(property);
-                                                setIsDialogOpen(true);
-                                            }}
-                                            variant="outline"
-                                            size="sm"
-                                        >
-                                            Edit
-                                        </Button>
-                                    </div>
+                                    <Button
+                                        variant="link"
+                                        size="sm"
+                                        className="items-center text-brand p-0"
+                                        onClick={() =>
+                                            navigate("/app/reports", {
+                                                state: {
+                                                    propertyId: property._id,
+                                                },
+                                            })
+                                        }
+                                    >
+                                        View
+                                        <ArrowRight className="w-2 h-2 text-brand" />
+                                    </Button>
+                                </td>
+                                <td className="px-4 py-4 text-sm text-gray-700">
+                                    <Button
+                                        variant="link"
+                                        size="sm"
+                                        className="items-center p-0"
+                                        onClick={() => {
+                                            setSelectedProperty(property);
+                                            setIsDialogOpen(true);
+                                        }}
+                                    >
+                                        <Ellipsis className="w-2 h-2" />
+                                    </Button>
                                 </td>
                             </motion.tr>
                         ))}
@@ -178,7 +187,7 @@ export default function Properties() {
                                 </h3>
 
                                 <div className="text-right">
-                                    {property.is_active ? (
+                                    {property.isActive ? (
                                         <Badge variant="success">
                                             • Active
                                         </Badge>

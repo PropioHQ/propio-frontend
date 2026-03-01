@@ -29,11 +29,11 @@ import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface FormDataSchema {
-    record_date: Date;
-    earning_source: BookingSource;
-    tds_value: number | string;
-    gst_value: number | string;
-    gross_amount: number | string;
+    recordDate: Date;
+    earningSource: BookingSource;
+    tdsValue: number | string;
+    gstValue: number | string;
+    grossAmount: number | string;
     note: string;
 }
 
@@ -53,11 +53,11 @@ export default function EarningFormDialog({
     >([]);
 
     const [formData, setFormData] = useState<FormDataSchema>({
-        record_date: new Date(),
-        earning_source: "" as BookingSource,
-        tds_value: "",
-        gst_value: "",
-        gross_amount: "",
+        recordDate: new Date(),
+        earningSource: "" as BookingSource,
+        tdsValue: "",
+        gstValue: "",
+        grossAmount: "",
         note: "",
     });
 
@@ -131,26 +131,26 @@ export default function EarningFormDialog({
         }
 
         let {
-            record_date,
-            earning_source,
-            tds_value,
-            gst_value,
-            gross_amount,
+            recordDate,
+            earningSource,
+            tdsValue,
+            gstValue,
+            grossAmount,
             note,
         }: FormDataSchema = formData;
 
-        const required = [record_date, earning_source, gross_amount];
+        const required = [recordDate, earningSource, grossAmount];
 
         if (required.some((v) => !v)) {
             toast.error("Please fill all required fields");
             return;
         }
 
-        gross_amount = Number(gross_amount);
-        tds_value = Number(tds_value);
-        gst_value = Number(gst_value);
+        grossAmount = Number(grossAmount);
+        tdsValue = Number(tdsValue);
+        gstValue = Number(gstValue);
 
-        if (isNaN(gross_amount) || gross_amount <= 0) {
+        if (isNaN(grossAmount) || grossAmount <= 0) {
             toast.error("Please enter a valid gross amount");
             return;
         }
@@ -163,11 +163,11 @@ export default function EarningFormDialog({
                 await EarningService.updateEarning(
                     earningId,
                     propertyId,
-                    record_date,
-                    earning_source,
-                    tds_value,
-                    gst_value,
-                    gross_amount,
+                    recordDate,
+                    earningSource,
+                    tdsValue,
+                    gstValue,
+                    grossAmount,
                     note,
                     attachmentIds,
                 );
@@ -175,11 +175,11 @@ export default function EarningFormDialog({
             } else {
                 await EarningService.addEarning(
                     propertyId,
-                    record_date,
-                    earning_source,
-                    tds_value,
-                    gst_value,
-                    gross_amount,
+                    recordDate,
+                    earningSource,
+                    tdsValue,
+                    gstValue,
+                    grossAmount,
                     note,
                     attachmentIds,
                 );
@@ -247,19 +247,19 @@ export default function EarningFormDialog({
     };
 
     const isRecordDateYearOld = useMemo(() => {
-        if (!formData.record_date) return false;
+        if (!formData.recordDate) return false;
 
-        return dayjs(formData.record_date).isBefore(new Date(), "year");
-    }, [formData.record_date]);
+        return dayjs(formData.recordDate).isBefore(new Date(), "year");
+    }, [formData.recordDate]);
 
     useEffect(() => {
         if (earning) {
             setFormData({
-                record_date: new Date(earning.record_date),
-                earning_source: earning.earning_source,
-                tds_value: earning.tds_value,
-                gst_value: earning.gst_value,
-                gross_amount: earning.gross_amount,
+                recordDate: new Date(earning.recordDate),
+                earningSource: earning.earningSource,
+                tdsValue: earning.tdsValue,
+                gstValue: earning.gstValue,
+                grossAmount: earning.grossAmount,
                 note: earning.note || "",
             });
 
@@ -304,9 +304,9 @@ export default function EarningFormDialog({
                                             id="date-picker-simple"
                                             className="justify-start font-normal hover:bg-background"
                                         >
-                                            {formData.record_date ? (
+                                            {formData.recordDate ? (
                                                 dayjs(
-                                                    formData.record_date,
+                                                    formData.recordDate,
                                                 ).format("MMM D, YYYY")
                                             ) : (
                                                 <span>Pick a date</span>
@@ -320,15 +320,15 @@ export default function EarningFormDialog({
                                         <Calendar
                                             mode="single"
                                             className="w-full rounded-lg"
-                                            selected={formData.record_date}
+                                            selected={formData.recordDate}
                                             onSelect={(d) =>
                                                 setFormData({
                                                     ...formData,
-                                                    record_date: d,
+                                                    recordDate: d,
                                                 })
                                             }
                                             defaultMonth={
-                                                formData.record_date ||
+                                                formData.recordDate ||
                                                 new Date()
                                             }
                                         />
@@ -344,12 +344,12 @@ export default function EarningFormDialog({
                             <div>
                                 <Label>Earning source *</Label>
                                 <Select
-                                    key={formData.earning_source}
-                                    value={formData.earning_source}
+                                    key={formData.earningSource}
+                                    value={formData.earningSource}
                                     onValueChange={(value) =>
                                         setFormData({
                                             ...formData,
-                                            earning_source:
+                                            earningSource:
                                                 value as BookingSource,
                                         })
                                     }
@@ -380,7 +380,7 @@ export default function EarningFormDialog({
                                 type="text"
                                 required
                                 min={0}
-                                value={formData.gross_amount}
+                                value={formData.grossAmount}
                                 onChange={(e) => {
                                     const v = Number(e.target.value);
                                     const amount =
@@ -390,7 +390,7 @@ export default function EarningFormDialog({
 
                                     setFormData({
                                         ...formData,
-                                        gross_amount: amount,
+                                        grossAmount: amount,
                                     });
                                 }}
                                 className="mt-1"
@@ -403,7 +403,7 @@ export default function EarningFormDialog({
                                 <Input
                                     type="text"
                                     min={0}
-                                    value={formData.gst_value}
+                                    value={formData.gstValue}
                                     onChange={(e) => {
                                         const v = Number(e.target.value);
                                         const amount =
@@ -413,7 +413,7 @@ export default function EarningFormDialog({
 
                                         setFormData({
                                             ...formData,
-                                            gst_value: amount,
+                                            gstValue: amount,
                                         });
                                     }}
                                     className="mt-1"
@@ -424,7 +424,7 @@ export default function EarningFormDialog({
                                 <Input
                                     type="text"
                                     min={0}
-                                    value={formData.tds_value}
+                                    value={formData.tdsValue}
                                     onChange={(e) => {
                                         const v = Number(e.target.value);
                                         const amount =
@@ -434,7 +434,7 @@ export default function EarningFormDialog({
 
                                         setFormData({
                                             ...formData,
-                                            tds_value: amount,
+                                            tdsValue: amount,
                                         });
                                     }}
                                     className="mt-1"

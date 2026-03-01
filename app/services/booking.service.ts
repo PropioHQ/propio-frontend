@@ -19,53 +19,53 @@ const BookingService = {
         return await API.get(`/api/v1/booking/all?${queryStr}`);
     },
     addBooking: async (
-        property_id: string,
-        guest_name: string,
-        guest_count: number,
-        check_in: Date,
-        check_out: Date,
+        propertyId: string,
+        guestName: string,
+        guestCount: number,
+        checkIn: Date,
+        checkOut: Date,
         amount: number,
-        booking_source: BookingSource,
-        payment_mode: BookingPaymentMode,
+        bookingSource: BookingSource,
+        paymentMode: BookingPaymentMode,
         note?: string,
         attachmentIds?: string[],
     ) => {
         return await API.post("/api/v1/booking", {
-            property_id,
-            guest_name,
-            guest_count,
-            check_in,
-            check_out,
+            propertyId,
+            guestName,
+            guestCount,
+            checkIn,
+            checkOut,
             amount,
-            booking_source,
-            payment_mode,
+            bookingSource,
+            paymentMode,
             note,
             attachmentIds,
         });
     },
     updateBooking: async (
-        booking_id: string,
-        property_id: string,
-        guest_name: string,
-        guest_count: number,
-        check_in: Date,
-        check_out: Date,
+        bookingId: string,
+        propertyId: string,
+        guestName: string,
+        guestCount: number,
+        checkIn: Date,
+        checkOut: Date,
         amount: number,
-        booking_source: BookingSource,
-        payment_mode: BookingPaymentMode,
+        bookingSource: BookingSource,
+        paymentMode: BookingPaymentMode,
         note?: string,
         attachmentIds?: string[],
     ) => {
         return await API.put("/api/v1/booking", {
-            booking_id,
-            property_id,
-            guest_name,
-            guest_count,
-            check_in,
-            check_out,
+            bookingId,
+            propertyId,
+            guestName,
+            guestCount,
+            checkIn,
+            checkOut,
             amount,
-            booking_source,
-            payment_mode,
+            bookingSource,
+            paymentMode,
             note,
             attachmentIds,
         });
@@ -74,6 +74,36 @@ const BookingService = {
         return await API.delete(
             `/api/v1/booking?bid=${bookingId}&pid=${propertyId}`,
         );
+    },
+    getAvailabilityByMonth: async (
+        propertyId: string,
+        month: number,
+        year: number,
+    ) => {
+        const params = new URLSearchParams();
+
+        params.append("m", month.toString());
+        params.append("y", year.toString());
+        params.append("pid", propertyId);
+
+        const queryStr = params.toString();
+
+        return await API.get(`/api/v1/booking/availability/month?${queryStr}`);
+    },
+    checkAvailability: async (
+        propertyId: string,
+        checkIn: Date,
+        checkOut: Date,
+    ) => {
+        const params = new URLSearchParams();
+
+        params.append("checkIn", checkIn.toISOString());
+        params.append("checkOut", checkOut.toISOString());
+        params.append("pid", propertyId);
+
+        const queryStr = params.toString();
+
+        return await API.get(`/api/v1/booking/availability/check?${queryStr}`);
     },
 };
 

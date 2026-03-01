@@ -13,7 +13,7 @@ import PropertyService from "@/services/property.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import { Calendar, Edit, EllipsisVertical, Plus } from "lucide-react";
+import { Calendar, Ellipsis, EllipsisVertical, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { MetaArgs, MetaFunction } from "react-router";
 
@@ -185,60 +185,60 @@ export default function Earnings() {
                                         >
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 {dayjs(
-                                                    earning.record_date,
+                                                    earning.recordDate,
                                                 ).format("Do MMM")}
                                             </td>
                                             <td className="px-4 py-4 text-sm">
                                                 <Badge
                                                     variant={
-                                                        earning.earning_source
+                                                        earning.earningSource
                                                     }
                                                 >
-                                                    {earning.earning_source}
+                                                    {earning.earningSource}
                                                 </Badge>
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 <AmountLabel
-                                                    value={earning.gross_amount}
+                                                    value={earning.grossAmount}
                                                 />
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 <AmountLabel
-                                                    value={earning.tds_value}
+                                                    value={earning.tdsValue}
                                                 />
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 <AmountLabel
-                                                    value={earning.gst_value}
+                                                    value={earning.gstValue}
                                                 />
                                             </td>
                                             <td
                                                 className={cn(
-                                                    "px-4 py-4 text-sm font-semibold",
-                                                    earning.net_amount >= 0
+                                                    "px-4 py-4 text-sm font-medium",
+                                                    earning.netAmount >= 0
                                                         ? "text-green-600"
                                                         : "text-red-600",
                                                 )}
                                             >
-                                                {earning.net_amount >= 0
+                                                {earning.netAmount >= 0
                                                     ? "+"
                                                     : ""}
                                                 <AmountLabel
-                                                    value={earning.net_amount}
+                                                    value={earning.netAmount}
                                                 />
                                             </td>
                                             <td className="px-4 py-4 text-right">
                                                 <Button
-                                                    type="button"
+                                                    variant="link"
+                                                    size="sm"
+                                                    className="items-center p-0"
                                                     onClick={() =>
                                                         handleEarningClick(
                                                             earning._id,
                                                         )
                                                     }
-                                                    variant="ghost"
-                                                    size="icon"
                                                 >
-                                                    <Edit />
+                                                    <Ellipsis className="w-2 h-2" />
                                                 </Button>
                                             </td>
                                         </motion.tr>
@@ -262,7 +262,7 @@ export default function Earnings() {
                                     whileTap={{ scale: 0.985 }}
                                     className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                                 >
-                                    {/* Amount Accent Strip */}
+                                    {/* Accent Strip */}
                                     <div className="absolute left-0 top-0 h-full w-1 bg-gray-900/80" />
 
                                     <div className="p-4">
@@ -271,16 +271,16 @@ export default function Earnings() {
                                             <div className="min-w-0 space-y-1.5">
                                                 <Badge
                                                     variant={
-                                                        earning.earning_source
+                                                        earning.earningSource
                                                     }
                                                 >
-                                                    {earning.earning_source}
+                                                    {earning.earningSource}
                                                 </Badge>
 
                                                 <div className="flex items-center gap-1.5 text-xs text-gray-500">
                                                     <Calendar className="h-3.5 w-3.5" />
                                                     {dayjs(
-                                                        earning.record_date,
+                                                        earning.recordDate,
                                                     ).format("Do MMM")}
                                                 </div>
                                             </div>
@@ -289,7 +289,7 @@ export default function Earnings() {
                                                 <p className="text-base font-semibold tracking-tight">
                                                     <AmountLabel
                                                         value={
-                                                            earning.gross_amount
+                                                            earning.grossAmount
                                                         }
                                                     />
                                                 </p>
@@ -308,7 +308,7 @@ export default function Earnings() {
                                                 <p className=" text-gray-900 mt-1">
                                                     <AmountLabel
                                                         value={
-                                                            earning.net_amount
+                                                            earning.netAmount
                                                         }
                                                     />
                                                 </p>
@@ -320,9 +320,7 @@ export default function Earnings() {
                                                 </p>
                                                 <p className=" text-gray-900 mt-1">
                                                     <AmountLabel
-                                                        value={
-                                                            earning.tds_value
-                                                        }
+                                                        value={earning.tdsValue}
                                                     />
                                                 </p>
                                             </div>
@@ -333,9 +331,7 @@ export default function Earnings() {
                                                 </p>
                                                 <p className=" text-gray-900 mt-1">
                                                     <AmountLabel
-                                                        value={
-                                                            earning.gst_value
-                                                        }
+                                                        value={earning.gstValue}
                                                     />
                                                 </p>
                                             </div>

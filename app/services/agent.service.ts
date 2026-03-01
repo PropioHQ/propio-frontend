@@ -2,10 +2,26 @@ import API from "@/lib/api";
 import type { Modules } from "@/types";
 
 const AgentService = {
-    scanDocument: async (attachmentId: string, module: Modules) => {
-        return await API.post(`/api/v1/agent/task/document`, {
+    processOcrDocument: async (
+        attachmentId: string,
+        propertyId: string,
+        module: Modules,
+    ) => {
+        return await API.post(`/api/v1/agent/task/ocr`, {
             attachmentId,
+            propertyId,
             module,
+        });
+    },
+    processStorageDocument: async (
+        documentId: string,
+        attachmentId: string,
+        propertyId: string,
+    ) => {
+        return await API.post(`/api/v1/agent/task/document`, {
+            documentId,
+            attachmentId,
+            propertyId,
         });
     },
     getScannedDocument: async (taskId: string) => {

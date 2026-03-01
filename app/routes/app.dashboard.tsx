@@ -170,10 +170,8 @@ export default function Dashboard() {
                     iconBg="bg-green-100"
                     iconColor="text-green-600"
                     title="Total Bookings"
-                    value={
-                        <AmountLabel value={reports?.total_bookings_value} />
-                    }
-                    sub={`${reports?.total_bookings_count || 0} booking(s) this month`}
+                    value={<AmountLabel value={reports?.totalBookingsValue} />}
+                    sub={`${reports?.totalBookingsCount || 0} booking(s) this month`}
                 />
 
                 <SummaryCard
@@ -181,7 +179,7 @@ export default function Dashboard() {
                     iconBg="bg-red-100"
                     iconColor="text-red-600"
                     title="Total Expenses"
-                    value={<AmountLabel value={reports?.total_expenses} />}
+                    value={<AmountLabel value={reports?.totalExpenses} />}
                 />
 
                 <SummaryCard
@@ -189,13 +187,13 @@ export default function Dashboard() {
                     iconBg="bg-purple-100"
                     iconColor="text-purple-600"
                     title="Total Earnings"
-                    value={<AmountLabel value={reports?.total_earnings} />}
+                    value={<AmountLabel value={reports?.totalEarnings} />}
                     valueClass={
-                        reports?.total_earnings >= 0
+                        reports?.totalEarnings >= 0
                             ? "text-green-600"
                             : "text-red-600"
                     }
-                    sub={`₹${(reports?.net_profit || 0).toLocaleString()} net profit this month`}
+                    sub={`₹${(reports?.netProfit || 0).toLocaleString()} net profit this month`}
                 />
             </div>
 
@@ -207,17 +205,17 @@ export default function Dashboard() {
                     icon={Receipt}
                     right={
                         <div className="text-xs text-gray-500">
-                            Total: {reports?.total_bookings_count || 0}
+                            Total: {reports?.totalBookingsCount || 0}
                         </div>
                     }
                 >
-                    {!reports?.bookings_by_source?.length ? (
+                    {!reports?.bookingsBySource?.length ? (
                         <div className="text-center text-gray-500 py-10 text-sm">
                             No bookings for selected month
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {reports.bookings_by_source.map((item, index) => (
+                            {reports.bookingsBySource.map((item, index) => (
                                 <motion.div
                                     key={item.source}
                                     {...fadeRow(index)}
@@ -236,13 +234,13 @@ export default function Dashboard() {
 
                 {/* Expenses */}
                 <ReportSectionCard title="Expense Category" icon={DollarSign}>
-                    {!reports?.expenses_by_category?.length ? (
+                    {!reports?.expensesByCategory?.length ? (
                         <div className="text-center text-gray-500 py-10 text-sm">
                             No expenses for selected month
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {reports.expenses_by_category.map((item, index) => (
+                            {reports.expensesByCategory.map((item, index) => (
                                 <motion.div
                                     key={item.category}
                                     {...fadeRow(index)}
@@ -261,13 +259,13 @@ export default function Dashboard() {
 
                 {/* Earnings */}
                 <ReportSectionCard title="Earning Sources" icon={Wallet}>
-                    {!reports?.earnings_by_source?.length ? (
+                    {!reports?.earningsBySource?.length ? (
                         <div className="text-center text-gray-500 py-10 text-sm">
                             No earnings for selected month
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {reports.earnings_by_source.map((item, index) => (
+                            {reports.earningsBySource.map((item, index) => (
                                 <motion.div
                                     key={item.source}
                                     {...fadeRow(index)}

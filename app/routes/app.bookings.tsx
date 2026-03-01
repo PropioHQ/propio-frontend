@@ -1,8 +1,8 @@
 import AmountLabel from "@/components/amountlabel";
 import BookingFormDialog from "@/components/bookingformdialog";
 import MonthYearPopover from "@/components/monthyearpopover";
+import OcrFormDialog from "@/components/ocrformdialog";
 import PropertySelector from "@/components/propertyselector";
-import ScanFormDialog from "@/components/scanformdialog";
 import ScreenLoader from "@/components/screenloader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { Modules } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import { Edit, EllipsisVertical, Plus, Scan } from "lucide-react";
+import { Ellipsis, EllipsisVertical, Plus, Scan } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { MetaArgs, MetaFunction } from "react-router";
 
@@ -141,7 +141,7 @@ export default function Bookings() {
                         Add
                     </Button>
                     <Button
-                        data-testid="scan-expense-button"
+                        data-testid="scan-booking-button"
                         onClick={handleScan}
                     >
                         <Scan className="w-4 h-4 mr-2" />
@@ -173,6 +173,9 @@ export default function Bookings() {
                                             ID
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                            Source
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                             Guest
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
@@ -183,9 +186,6 @@ export default function Bookings() {
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                             Check-out
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Source
                                         </th>
                                         <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
                                             Amount
@@ -210,51 +210,51 @@ export default function Bookings() {
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 {booking.ref}
                                             </td>
-                                            <td className="px-4 py-4 text-sm text-gray-700">
-                                                {booking.guest_name}
+                                            <td className="px-4 py-4">
+                                                <Badge
+                                                    variant={
+                                                        booking.bookingSource
+                                                    }
+                                                >
+                                                    {booking.bookingSource}
+                                                </Badge>
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                {booking.guest_count}{" "}
-                                                {booking.guest_count === 1
+                                                {booking.guestName}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-gray-700">
+                                                {booking.guestCount}{" "}
+                                                {booking.guestCount === 1
                                                     ? "guest"
                                                     : "guests"}
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                {dayjs(booking.check_in).format(
+                                                {dayjs(booking.checkIn).format(
                                                     "Do MMM",
                                                 )}
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                {dayjs(
-                                                    booking.check_out,
-                                                ).format("Do MMM")}
+                                                {dayjs(booking.checkOut).format(
+                                                    "Do MMM",
+                                                )}
                                             </td>
-                                            <td className="px-4 py-4">
-                                                <Badge
-                                                    variant={
-                                                        booking.booking_source
-                                                    }
-                                                >
-                                                    {booking.booking_source}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-4 py-4 text-right text-sm font-semibold">
+                                            <td className="px-4 py-4 text-right text-sm font-medium">
                                                 <AmountLabel
                                                     value={booking.amount}
                                                 />
                                             </td>
                                             <td className="px-4 py-4 text-right">
                                                 <Button
-                                                    type="button"
+                                                    variant="link"
+                                                    size="sm"
+                                                    className="items-center p-0"
                                                     onClick={() =>
                                                         handleBookingClick(
                                                             booking._id,
                                                         )
                                                     }
-                                                    variant="ghost"
-                                                    size="icon"
                                                 >
-                                                    <Edit />
+                                                    <Ellipsis className="w-2 h-2" />
                                                 </Button>
                                             </td>
                                         </motion.tr>
@@ -278,7 +278,7 @@ export default function Bookings() {
                                     whileTap={{ scale: 0.985 }}
                                     className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                                 >
-                                    {/* Amount Accent Strip */}
+                                    {/* Accent Strip */}
                                     <div className="absolute left-0 top-0 h-full w-1 bg-gray-900/80" />
 
                                     <div className="p-4">
@@ -287,10 +287,10 @@ export default function Bookings() {
                                             <div className="min-w-0 space-y-1.5">
                                                 <Badge
                                                     variant={
-                                                        booking.booking_source
+                                                        booking.bookingSource
                                                     }
                                                 >
-                                                    {booking.booking_source}
+                                                    {booking.bookingSource}
                                                 </Badge>
 
                                                 <p className="text-[11px] text-gray-400">
@@ -305,7 +305,7 @@ export default function Bookings() {
                                                     />
                                                 </p>
                                                 <p className="text-[11px] text-gray-400">
-                                                    {booking.guest_count}{" "}
+                                                    {booking.guestCount}{" "}
                                                     Guest(s)
                                                 </p>
                                             </div>
@@ -319,7 +319,7 @@ export default function Bookings() {
                                                 </p>
                                                 <p className="text-gray-900 truncate mt-1">
                                                     {
-                                                        booking.guest_name.split(
+                                                        booking.guestName.split(
                                                             " ",
                                                         )[0]
                                                     }
@@ -331,7 +331,7 @@ export default function Bookings() {
                                                 </p>
                                                 <p className=" text-gray-900 mt-1">
                                                     {dayjs(
-                                                        booking.check_in,
+                                                        booking.checkIn,
                                                     ).format("Do MMM")}
                                                 </p>
                                             </div>
@@ -341,7 +341,7 @@ export default function Bookings() {
                                                 </p>
                                                 <p className=" text-gray-900 mt-1">
                                                     {dayjs(
-                                                        booking.check_out,
+                                                        booking.checkOut,
                                                     ).format("Do MMM")}
                                                 </p>
                                             </div>
@@ -353,7 +353,7 @@ export default function Bookings() {
                                                 }
                                                 variant="ghost"
                                                 size="icon"
-                                                aria-label="Edit expense"
+                                                aria-label="Edit booking"
                                             >
                                                 <EllipsisVertical className="h-4 w-4 text-gray-700" />
                                             </Button>
@@ -381,7 +381,7 @@ export default function Bookings() {
                 />
             ) : null}
             {scanDialog ? (
-                <ScanFormDialog
+                <OcrFormDialog
                     open={scanDialog}
                     onOpenChange={setScanDialog}
                     propertyId={selectedProperty}

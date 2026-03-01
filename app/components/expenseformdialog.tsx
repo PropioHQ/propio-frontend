@@ -45,11 +45,11 @@ export default function ExpenseFormDialog({
     >([]);
 
     const [formData, setFormData] = useState({
-        record_date: new Date(),
+        recordDate: new Date(),
         category: "" as ExpenseCategory,
         amount: "",
-        payment_mode: ExpensePaymentMode.UPI,
-        vendor_name: "",
+        paymentMode: ExpensePaymentMode.UPI,
+        vendorName: "",
         note: "",
     });
 
@@ -123,22 +123,22 @@ export default function ExpenseFormDialog({
         }
 
         let {
-            record_date,
+            recordDate,
             category,
             amount,
-            payment_mode,
-            vendor_name,
+            paymentMode,
+            vendorName,
             note,
         }: {
-            record_date: Date;
+            recordDate: Date;
             category: ExpenseCategory;
             amount: number | string;
-            payment_mode: ExpensePaymentMode;
-            vendor_name: string;
+            paymentMode: ExpensePaymentMode;
+            vendorName: string;
             note: string;
         } = formData;
 
-        const required = [record_date, category, amount, payment_mode];
+        const required = [recordDate, category, amount, paymentMode];
 
         if (required.some((v) => !v)) {
             toast.error("Please fill all required fields");
@@ -160,11 +160,11 @@ export default function ExpenseFormDialog({
                 await ExpenseService.updateExpense(
                     expenseId,
                     propertyId,
-                    record_date,
+                    recordDate,
                     category,
                     amount,
-                    payment_mode,
-                    vendor_name,
+                    paymentMode,
+                    vendorName,
                     note,
                     attachmentIds,
                 );
@@ -172,11 +172,11 @@ export default function ExpenseFormDialog({
             } else {
                 await ExpenseService.addExpense(
                     propertyId,
-                    record_date,
+                    recordDate,
                     category,
                     amount,
-                    payment_mode,
-                    vendor_name,
+                    paymentMode,
+                    vendorName,
                     note,
                     attachmentIds,
                 );
@@ -244,20 +244,20 @@ export default function ExpenseFormDialog({
     };
 
     const isRecordDateYearOld = useMemo(() => {
-        if (!formData.record_date) return false;
+        if (!formData.recordDate) return false;
 
-        return dayjs(formData.record_date).isBefore(new Date(), "year");
-    }, [formData.record_date]);
+        return dayjs(formData.recordDate).isBefore(new Date(), "year");
+    }, [formData.recordDate]);
 
     useEffect(() => {
         const data = expense || prefill;
         if (data) {
             setFormData({
-                record_date: new Date(data.record_date),
+                recordDate: new Date(data.recordDate),
                 category: data.category,
                 amount: data.amount,
-                payment_mode: data.payment_mode,
-                vendor_name: data.vendor_name,
+                paymentMode: data.paymentMode,
+                vendorName: data.vendorName,
                 note: data.note || "",
             });
 
@@ -294,15 +294,15 @@ export default function ExpenseFormDialog({
                         <div className="flex flex-col">
                             <Label>Record date *</Label>
                             <Popover modal>
-                                <PopoverTrigger asChild>
+                                <PopoverTrigger className="mt-2" asChild>
                                     <Button
                                         type="button"
                                         variant="outline"
                                         id="date-picker-simple"
-                                        className="justify-start font-normal mt-1 hover:bg-background"
+                                        className="justify-start font-normal hover:bg-background"
                                     >
-                                        {formData.record_date ? (
-                                            dayjs(formData.record_date).format(
+                                        {formData.recordDate ? (
+                                            dayjs(formData.recordDate).format(
                                                 "MMM D, YYYY",
                                             )
                                         ) : (
@@ -317,15 +317,15 @@ export default function ExpenseFormDialog({
                                     <Calendar
                                         mode="single"
                                         className="w-full rounded-lg"
-                                        selected={formData.record_date}
+                                        selected={formData.recordDate}
                                         onSelect={(d) =>
                                             setFormData({
                                                 ...formData,
-                                                record_date: d,
+                                                recordDate: d,
                                             })
                                         }
                                         defaultMonth={
-                                            formData.record_date || new Date()
+                                            formData.recordDate || new Date()
                                         }
                                     />
                                 </PopoverContent>
@@ -391,12 +391,12 @@ export default function ExpenseFormDialog({
                             <div>
                                 <Label>Payment mode *</Label>
                                 <Select
-                                    key={formData.payment_mode}
-                                    value={formData.payment_mode}
+                                    key={formData.paymentMode}
+                                    value={formData.paymentMode}
                                     onValueChange={(value) =>
                                         setFormData({
                                             ...formData,
-                                            payment_mode:
+                                            paymentMode:
                                                 value as ExpensePaymentMode,
                                         })
                                     }
@@ -425,11 +425,11 @@ export default function ExpenseFormDialog({
                             <Label>Vendor name</Label>
                             <Input
                                 type="text"
-                                value={formData.vendor_name}
+                                value={formData.vendorName}
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
-                                        vendor_name: e.target.value,
+                                        vendorName: e.target.value,
                                     })
                                 }
                                 className="mt-1"

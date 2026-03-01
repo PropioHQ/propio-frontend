@@ -1,8 +1,8 @@
 import AmountLabel from "@/components/amountlabel";
 import ExpenseFormDialog from "@/components/expenseformdialog";
 import MonthYearPopover from "@/components/monthyearpopover";
+import OcrFormDialog from "@/components/ocrformdialog";
 import PropertySelector from "@/components/propertyselector";
-import ScanFormDialog from "@/components/scanformdialog";
 import ScreenLoader from "@/components/screenloader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { Modules } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import { Calendar, Edit, EllipsisVertical, Plus, Scan } from "lucide-react";
+import { Calendar, Ellipsis, EllipsisVertical, Plus, Scan } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { MetaArgs, MetaFunction } from "react-router";
 
@@ -202,7 +202,7 @@ export default function Expenses() {
                                         >
                                             <td className="px-4 py-4 text-sm text-gray-700">
                                                 {dayjs(
-                                                    expense.record_date,
+                                                    expense.recordDate,
                                                 ).format("Do MMM")}
                                             </td>
                                             <td className="px-4 py-4 text-sm">
@@ -213,13 +213,13 @@ export default function Expenses() {
                                                 </Badge>
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                {expense.vendor_name ||
+                                                {expense.vendorName ||
                                                     "Unknown"}
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-700">
-                                                {expense.payment_mode || ""}
+                                                {expense.paymentMode || ""}
                                             </td>
-                                            <td className="px-4 py-4 text-rose-700 text-sm font-semibold">
+                                            <td className="px-4 py-4 text-rose-700 text-sm font-medium">
                                                 -
                                                 <AmountLabel
                                                     value={expense.amount}
@@ -227,16 +227,16 @@ export default function Expenses() {
                                             </td>
                                             <td className="px-4 py-4 text-right">
                                                 <Button
-                                                    type="button"
+                                                    variant="link"
+                                                    size="sm"
+                                                    className="items-center p-0"
                                                     onClick={() =>
                                                         handleExpenseClick(
                                                             expense._id,
                                                         )
                                                     }
-                                                    variant="ghost"
-                                                    size="icon"
                                                 >
-                                                    <Edit />
+                                                    <Ellipsis className="w-2 h-2" />
                                                 </Button>
                                             </td>
                                         </motion.tr>
@@ -277,7 +277,7 @@ export default function Expenses() {
                                                 <div className="flex items-center gap-1.5 text-xs text-gray-500">
                                                     <Calendar className="h-3.5 w-3.5" />
                                                     {dayjs(
-                                                        expense.record_date,
+                                                        expense.recordDate,
                                                     ).format("Do MMM")}
                                                 </div>
                                             </div>
@@ -301,7 +301,7 @@ export default function Expenses() {
                                                     Vendor name
                                                 </p>
                                                 <p className="text-gray-900 line-clamp-2 mt-1">
-                                                    {expense.vendor_name ||
+                                                    {expense.vendorName ||
                                                         "Unknown"}
                                                 </p>
                                             </div>
@@ -311,7 +311,7 @@ export default function Expenses() {
                                                     Payment mode
                                                 </p>
                                                 <p className=" text-gray-900 mt-1">
-                                                    {expense.payment_mode}
+                                                    {expense.paymentMode}
                                                 </p>
                                             </div>
                                             <Button
@@ -350,7 +350,7 @@ export default function Expenses() {
                 />
             ) : null}
             {scanDialog ? (
-                <ScanFormDialog
+                <OcrFormDialog
                     open={scanDialog}
                     onOpenChange={setScanDialog}
                     propertyId={selectedProperty}

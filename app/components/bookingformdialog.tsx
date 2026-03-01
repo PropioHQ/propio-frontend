@@ -14,7 +14,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { BOOKING_KEY } from "@/querykeys";
 import AttachmentService from "@/services/attachment.service";
@@ -46,13 +45,13 @@ export default function BookingFormDialog({
     >([]);
 
     const [formData, setFormData] = useState({
-        check_in: new Date(),
-        check_out: new Date(),
+        checkIn: new Date(),
+        checkOut: new Date(),
         amount: "",
-        booking_source: BookingSource.DIRECT,
-        guest_name: "",
-        guest_count: "",
-        payment_mode: BookingPaymentMode.UPI,
+        bookingSource: BookingSource.DIRECT,
+        guestName: "",
+        guestCount: "",
+        paymentMode: BookingPaymentMode.UPI,
         note: "",
         generate_receipt: false,
     });
@@ -127,33 +126,33 @@ export default function BookingFormDialog({
         }
 
         let {
-            check_in,
-            check_out,
+            checkIn,
+            checkOut,
             amount,
-            booking_source,
-            guest_name,
-            guest_count,
-            payment_mode,
+            bookingSource,
+            guestName,
+            guestCount,
+            paymentMode,
             note,
         }: {
-            check_in: Date;
-            check_out: Date;
+            checkIn: Date;
+            checkOut: Date;
             amount: string | number;
-            booking_source: BookingSource;
-            guest_name: string;
-            guest_count: string | number;
-            payment_mode: BookingPaymentMode;
+            bookingSource: BookingSource;
+            guestName: string;
+            guestCount: string | number;
+            paymentMode: BookingPaymentMode;
             note?: string;
         } = formData;
 
         const required = [
-            check_in,
-            check_out,
+            checkIn,
+            checkOut,
             amount,
-            booking_source,
-            guest_name?.trim(),
-            guest_count,
-            payment_mode,
+            bookingSource,
+            guestName?.trim(),
+            guestCount,
+            paymentMode,
         ];
 
         if (required.some((v) => !v)) {
@@ -162,9 +161,9 @@ export default function BookingFormDialog({
         }
 
         amount = Number(amount);
-        guest_count = Number(guest_count);
+        guestCount = Number(guestCount);
 
-        if (check_in > check_out) {
+        if (checkIn > checkOut) {
             toast.error("Check-in date should be before check-out date");
             return;
         }
@@ -174,7 +173,7 @@ export default function BookingFormDialog({
             return;
         }
 
-        if (isNaN(guest_count) || guest_count <= 0) {
+        if (isNaN(guestCount) || guestCount <= 0) {
             toast.error("Please enter a valid guest count");
             return;
         }
@@ -187,13 +186,13 @@ export default function BookingFormDialog({
                 await BookingService.updateBooking(
                     bookingId,
                     propertyId,
-                    guest_name,
-                    guest_count,
-                    check_in,
-                    check_out,
+                    guestName,
+                    guestCount,
+                    checkIn,
+                    checkOut,
                     amount,
-                    booking_source,
-                    payment_mode,
+                    bookingSource,
+                    paymentMode,
                     note,
                     attachmentIds,
                 );
@@ -201,13 +200,13 @@ export default function BookingFormDialog({
             } else {
                 await BookingService.addBooking(
                     propertyId,
-                    guest_name,
-                    guest_count,
-                    check_in,
-                    check_out,
+                    guestName,
+                    guestCount,
+                    checkIn,
+                    checkOut,
                     amount,
-                    booking_source,
-                    payment_mode,
+                    bookingSource,
+                    paymentMode,
                     note,
                     attachmentIds,
                 );
@@ -279,13 +278,13 @@ export default function BookingFormDialog({
 
         if (data) {
             setFormData({
-                check_in: new Date(data.check_in),
-                check_out: new Date(data.check_out),
+                checkIn: new Date(data.checkIn),
+                checkOut: new Date(data.checkOut),
                 amount: data.amount,
-                booking_source: data.booking_source,
-                guest_name: data.guest_name,
-                guest_count: data.guest_count,
-                payment_mode: data.payment_mode,
+                bookingSource: data.bookingSource,
+                guestName: data.guestName,
+                guestCount: data.guestCount,
+                paymentMode: data.paymentMode,
                 note: data.note || "",
                 generate_receipt: false,
             });
@@ -324,15 +323,15 @@ export default function BookingFormDialog({
                             <div className="flex flex-col">
                                 <Label>Check-in date *</Label>
                                 <Popover modal>
-                                    <PopoverTrigger asChild>
+                                    <PopoverTrigger className="mt-2" asChild>
                                         <Button
                                             type="button"
                                             variant="outline"
                                             id="date-picker-simple"
-                                            className="justify-start font-normal mt-1 hover:bg-background"
+                                            className="justify-start font-normal hover:bg-background"
                                         >
-                                            {formData.check_in ? (
-                                                dayjs(formData.check_in).format(
+                                            {formData.checkIn ? (
+                                                dayjs(formData.checkIn).format(
                                                     "MMM D, YYYY",
                                                 )
                                             ) : (
@@ -347,15 +346,15 @@ export default function BookingFormDialog({
                                         <Calendar
                                             mode="single"
                                             className="w-full rounded-lg"
-                                            selected={formData.check_in}
+                                            selected={formData.checkIn}
                                             onSelect={(d) =>
                                                 setFormData({
                                                     ...formData,
-                                                    check_in: d,
+                                                    checkIn: d,
                                                 })
                                             }
                                             defaultMonth={
-                                                formData.check_in || new Date()
+                                                formData.checkIn || new Date()
                                             }
                                         />
                                     </PopoverContent>
@@ -365,17 +364,17 @@ export default function BookingFormDialog({
                             <div className="flex flex-col">
                                 <Label>Check-out date *</Label>
                                 <Popover modal>
-                                    <PopoverTrigger asChild>
+                                    <PopoverTrigger className="mt-2" asChild>
                                         <Button
                                             type="button"
                                             variant="outline"
                                             id="date-picker-simple"
-                                            className="justify-start font-normal mt-1 hover:bg-background"
+                                            className="justify-start font-normal hover:bg-background"
                                         >
-                                            {formData.check_out ? (
-                                                dayjs(
-                                                    formData.check_out,
-                                                ).format("MMM D, YYYY")
+                                            {formData.checkOut ? (
+                                                dayjs(formData.checkOut).format(
+                                                    "MMM D, YYYY",
+                                                )
                                             ) : (
                                                 <span>Pick a date</span>
                                             )}
@@ -388,15 +387,15 @@ export default function BookingFormDialog({
                                         <Calendar
                                             className="w-full rounded-lg"
                                             mode="single"
-                                            selected={formData.check_out}
+                                            selected={formData.checkOut}
                                             onSelect={(d) =>
                                                 setFormData({
                                                     ...formData,
-                                                    check_out: d,
+                                                    checkOut: d,
                                                 })
                                             }
                                             defaultMonth={
-                                                formData.check_out || new Date()
+                                                formData.checkOut || new Date()
                                             }
                                         />
                                     </PopoverContent>
@@ -410,11 +409,11 @@ export default function BookingFormDialog({
                                 <Input
                                     type="text"
                                     required
-                                    value={formData.guest_name}
+                                    value={formData.guestName}
                                     onChange={(e) =>
                                         setFormData({
                                             ...formData,
-                                            guest_name: e.target.value,
+                                            guestName: e.target.value,
                                         })
                                     }
                                     className="mt-1"
@@ -426,17 +425,17 @@ export default function BookingFormDialog({
                                 <Input
                                     type="text"
                                     required
-                                    value={formData.guest_count}
+                                    value={formData.guestCount}
                                     onChange={(e) => {
                                         const v = Number(e.target.value);
-                                        const guest_count =
+                                        const guestCount =
                                             isNaN(v) || !v
                                                 ? ""
                                                 : Math.abs(v).toString();
 
                                         setFormData({
                                             ...formData,
-                                            guest_count,
+                                            guestCount,
                                         });
                                     }}
                                     className="mt-1"
@@ -471,12 +470,12 @@ export default function BookingFormDialog({
                             <div>
                                 <Label>Booking source *</Label>
                                 <Select
-                                    key={formData.booking_source}
-                                    value={formData.booking_source}
+                                    key={formData.bookingSource}
+                                    value={formData.bookingSource}
                                     onValueChange={(value) =>
                                         setFormData({
                                             ...formData,
-                                            booking_source:
+                                            bookingSource:
                                                 value as BookingSource,
                                         })
                                     }
@@ -502,13 +501,13 @@ export default function BookingFormDialog({
                             <div>
                                 <Label>Payment mode *</Label>
                                 <Select
-                                    key={formData.payment_mode}
-                                    value={formData.payment_mode}
+                                    key={formData.paymentMode}
+                                    value={formData.paymentMode}
                                     required
                                     onValueChange={(value) =>
                                         setFormData({
                                             ...formData,
-                                            payment_mode:
+                                            paymentMode:
                                                 value as BookingPaymentMode,
                                         })
                                     }
@@ -553,7 +552,7 @@ export default function BookingFormDialog({
                                 <div className="p-4 bg-blue-50 rounded-lg">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <FileText className="w-5 h-5 text-blue-600" />
+                                            <FileText className="w-4 h-4 text-blue-600" />
                                             <span className="text-sm font-medium">
                                                 Booking Receipt
                                             </span>

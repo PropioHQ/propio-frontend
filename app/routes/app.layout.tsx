@@ -134,9 +134,11 @@ export default function AppLayout() {
                                     "rounded-full": collapsed,
                                 })}
                             />
-                            <p className="mb-4 text-xs text-gray-500 font-medium">
-                                beta
-                            </p>
+                            {!collapsed && (
+                                <p className="mb-4 text-xs text-gray-500 font-medium">
+                                    beta
+                                </p>
+                            )}
                         </div>
 
                         <button
@@ -164,21 +166,17 @@ export default function AppLayout() {
                                             handleNavigation(item.path)
                                         }
                                         className={cn(
-                                            "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-transform",
+                                            "flex flex-row items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-transform",
                                             isActive
                                                 ? "bg-primary text-white"
                                                 : "text-gray-700 hover:bg-gray-100",
+                                            collapsed
+                                                ? "w-fit h-fit"
+                                                : "w-full h-fit text-nowrap",
                                         )}
-                                        title={collapsed ? item.label : ""}
+                                        title={item.label}
                                     >
-                                        <Icon
-                                            className={cn(
-                                                "w-4 h-4",
-                                                isActive
-                                                    ? "text-white"
-                                                    : "text-gray-600",
-                                            )}
-                                        />
+                                        <Icon className="w-4 h-4 shrink-0" />
                                         {!collapsed && item.label}
                                     </button>
                                 );

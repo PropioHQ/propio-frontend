@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { BookingSource, ExpenseCategory } from "@/types";
+import { BookingSource, DocumentType, ExpenseCategory } from "@/types";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
@@ -23,6 +23,10 @@ const badgeVariants = cva(
                     "border-transparent bg-amber-50 text-amber-700 hover:bg-amber-200",
                 info: "border-transparent bg-blue-50 text-blue-700 hover:bg-blue-200",
 
+                // Common variants
+                Other: "border-transparent bg-gray-50 text-gray-700 hover:bg-gray-200",
+                Others: "border-transparent bg-gray-50 text-gray-700 hover:bg-gray-200",
+
                 // Booking source variants
                 [BookingSource.DIRECT]:
                     "border-transparent bg-emerald-50 text-emerald-700 hover:bg-emerald-200",
@@ -32,8 +36,6 @@ const badgeVariants = cva(
                     "border-transparent bg-indigo-50 text-indigo-700 hover:bg-indigo-200",
                 [BookingSource.AGENT]:
                     "border-transparent bg-purple-50 text-purple-700 hover:bg-purple-200",
-                [BookingSource.OTHER]:
-                    "border-transparent bg-gray-50 text-gray-700 hover:bg-gray-200",
 
                 // Expense category variants
                 [ExpenseCategory.ELECTRICITY]:
@@ -64,8 +66,28 @@ const badgeVariants = cva(
                     "border-transparent bg-violet-50 text-violet-700 hover:bg-violet-200",
                 [ExpenseCategory.PROMOTION_MARKETING]:
                     "border-transparent bg-emerald-50 text-emerald-700 hover:bg-emerald-200",
-                [ExpenseCategory.OTHERS]:
-                    "border-transparent bg-gray-50 text-gray-700 hover:bg-gray-200",
+
+                // Document type variants
+                [DocumentType.AGREEMENT]:
+                    "border-transparent bg-yellow-50 text-yellow-700 hover:bg-yellow-200",
+                [DocumentType.IDENTITY_DOCUMENT]:
+                    "border-transparent bg-blue-50 text-blue-700 hover:bg-blue-200",
+                [DocumentType.LEASE_AGREEMENT]:
+                    "border-transparent bg-teal-50 text-teal-700 hover:bg-teal-200",
+                [DocumentType.LEGAL_NOTICE]:
+                    "border-transparent bg-cyan-50 text-cyan-700 hover:bg-cyan-200",
+                [DocumentType.NOC]:
+                    "border-transparent bg-orange-50 text-orange-700 hover:bg-orange-200",
+                [DocumentType.NOTICE]:
+                    "border-transparent bg-red-50 text-red-700 hover:bg-red-200",
+                [DocumentType.PLATFORM_AGREEMENT]:
+                    "border-transparent bg-purple-50 text-purple-700 hover:bg-purple-200",
+                [DocumentType.PROPERTY_DOCUMENT]:
+                    "border-transparent bg-green-50 text-green-700 hover:bg-green-200",
+                [DocumentType.PURCHASE_DOCUMENT]:
+                    "border-transparent bg-indigo-50 text-indigo-700 hover:bg-indigo-200",
+                [DocumentType.RENTAL_AGREEMENT]:
+                    "border-transparent bg-rose-50 text-rose-700 hover:bg-rose-200",
             },
         },
         defaultVariants: {

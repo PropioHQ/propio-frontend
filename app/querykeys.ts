@@ -25,3 +25,8 @@ export const EARNING_MONTHLY_STATS_KEY = "earning-monthly-stats";
 export const EXPENSES_KEY = "expenses-key";
 export const EXPENSE_KEY = "expense-details";
 export const EXPENSE_MONTHLY_STATS_KEY = "expense-monthly-stats";
+
+// document
+export const DOCUMENTS_KEY = "documents-key";
+export const DOCUMENT_KEY = "document-details";
+export const DOCUMENT_EVALUATION_KEY = "document-evaluation-details";

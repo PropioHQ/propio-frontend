@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import AgentService from "@/services/agent.service";
 import AttachmentService from "@/services/attachment.service";
+import { AgentTaskStatus } from "@/types";
 import { AlertCircle, CheckCircle2, Loader2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -38,7 +39,7 @@ const PROCESS_STAGES: ProcessStage[] = [
     { id: "complete", label: "Complete", description: "Ready to review" },
 ];
 
-export default function ScanFormDialog({
+export default function OcrFormDialog({
     open,
     onOpenChange,
     propertyId,
@@ -64,12 +65,12 @@ export default function ScanFormDialog({
             const { status, output } =
                 await AgentService.getScannedDocument(taskId);
 
-            if (status === "completed") {
+            if (status === AgentTaskStatus.COMPLETED) {
                 setStatus("complete");
                 clearPollingInterval();
 
                 outputRef.current = output;
-            } else if (status === "scanning") {
+            } else if (status === AgentTaskStatus.PROCESSING) {
                 setStatus("scanning");
             }
         } catch (error) {
@@ -86,8 +87,9 @@ export default function ScanFormDialog({
         setErrorMessage(null);
 
         try {
-            const { taskId } = await AgentService.scanDocument(
+            const { taskId } = await AgentService.processOcrDocument(
                 attachmentId,
+                propertyId,
                 module,
             );
 

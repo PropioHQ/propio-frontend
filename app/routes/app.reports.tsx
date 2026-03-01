@@ -83,7 +83,7 @@ export default function Reports() {
         staleTime: 2 * 60 * 1000, // 2 minutes
     });
 
-    const { reports, property_summaries } = useMemo(
+    const { reports, propertySummaries } = useMemo(
         () => monthlyReport || {},
         [monthlyReport],
     );
@@ -94,26 +94,26 @@ export default function Reports() {
             {
                 Property: p.property_name,
                 Period: selectedMonth,
-                "Number of bookings": p.total_bookings_count,
-                "Bookings value": p.total_bookings_value,
-                "Total expenses": p.total_expenses,
-                "Total earnings": p.total_earnings,
-                "Net earnings (After taxes)": p.net_earnings,
-                "Net profit": p.net_profit,
+                "Number of bookings": p.totalBookingsCount,
+                "Bookings value": p.totalBookingsValue,
+                "Total expenses": p.totalExpenses,
+                "Total earnings": p.totalEarnings,
+                "Net earnings (After taxes)": p.netEarnings,
+                "Net profit": p.netProfit,
             },
         ];
 
         // ---------- Bookings By Source ----------
-        const bookingsRows = Object.entries(p.bookings_count_by_source).map(
+        const bookingsRows = Object.entries(p.bookingsCountBySource).map(
             ([source, count]) => ({
                 Source: source,
                 "Number of bookings": count,
-                "Bookings value": p.bookings_value_by_source[source] || 0,
+                "Bookings value": p.bookingsValueBySource[source] || 0,
             }),
         );
 
         // ---------- Earnings By Source ----------
-        const earningsRows = Object.entries(p.earnings_by_source).map(
+        const earningsRows = Object.entries(p.earningsBySource).map(
             ([source, amount]) => ({
                 Source: source,
                 "Total earnings": amount,
@@ -121,7 +121,7 @@ export default function Reports() {
         );
 
         // ---------- Expenses By Category ----------
-        const expenseRows = Object.entries(p.expenses_by_category || {}).map(
+        const expenseRows = Object.entries(p.expensesByCategory || {}).map(
             ([category, amount]) => ({
                 Category: category,
                 "Total expenses": amount,
@@ -144,8 +144,8 @@ export default function Reports() {
     };
 
     const downloadReports = (propertyId) => {
-        const summary = property_summaries.find(
-            (s) => s.property_id === propertyId,
+        const summary = propertySummaries.find(
+            (s) => s.propertyId === propertyId,
         );
         if (!summary) {
             toast.error("Report summary not found!");
@@ -232,14 +232,14 @@ export default function Reports() {
                                     <th className="px-5 py-4 text-left font-semibold">
                                         Net Profit
                                     </th>
-                                    <th className="px-5 py-4 text-center font-semibold">
+                                    <th className="px-5 py-4 text-left font-semibold">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
 
                             <tbody className="divide-y">
-                                {property_summaries?.map((s, index) => (
+                                {propertySummaries?.map((s, index) => (
                                     <motion.tr
                                         key={s._id}
                                         {...fadeRow(index)}
@@ -250,17 +250,17 @@ export default function Reports() {
                                         </td>
                                         <td className="px-5 py-4 text-gray-700">
                                             <AmountLabel
-                                                value={s.total_bookings_value}
+                                                value={s.totalBookingsValue}
                                             />
                                         </td>
                                         <td className="px-5 py-4 text-gray-700">
                                             <AmountLabel
-                                                value={s.total_expenses}
+                                                value={s.totalExpenses}
                                             />
                                         </td>
                                         <td className="px-5 py-4 text-gray-700">
                                             <AmountLabel
-                                                value={s.total_earnings}
+                                                value={s.totalEarnings}
                                             />
                                         </td>
                                         <td className="px-5 py-4 text-gray-700">
@@ -268,24 +268,24 @@ export default function Reports() {
                                         </td>
                                         <td
                                             className={cn(
-                                                "px-5 py-4 font-semibold",
-                                                s.net_profit >= 0
+                                                "px-5 py-4 font-medium",
+                                                s.netProfit >= 0
                                                     ? "text-green-600"
                                                     : "text-red-600",
                                             )}
                                         >
-                                            <AmountLabel value={s.net_profit} />
+                                            <AmountLabel value={s.netProfit} />
                                         </td>
-                                        <td className="px-5 py-4 text-gray-700 text-center">
-                                            {s.property_id ===
+                                        <td className="px-5 py-4 text-gray-700">
+                                            {s.propertyId ===
                                             selectedProperty ? (
                                                 <Button
                                                     variant="link"
                                                     size="sm"
-                                                    className="items-center text-brand"
+                                                    className="items-center text-brand p-0"
                                                     onClick={() =>
                                                         downloadReports(
-                                                            s.property_id,
+                                                            s.propertyId,
                                                         )
                                                     }
                                                 >
@@ -296,10 +296,10 @@ export default function Reports() {
                                                 <Button
                                                     variant="link"
                                                     size="sm"
-                                                    className="items-center text-brand"
+                                                    className="items-center text-brand p-0"
                                                     onClick={() =>
                                                         setSelectedProperty(
-                                                            s.property_id,
+                                                            s.propertyId,
                                                         )
                                                     }
                                                 >
@@ -316,13 +316,13 @@ export default function Reports() {
 
                     {/* Mobile Card List */}
                     <div className="md:hidden space-y-4">
-                        {property_summaries?.map((s, index) => (
+                        {propertySummaries?.map((s, index) => (
                             <motion.div
                                 key={s._id}
                                 {...fadeRow(index)}
                                 className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                             >
-                                {/* Amount Accent Strip */}
+                                {/* Accent Strip */}
                                 <div className="absolute left-0 top-0 h-full w-1 bg-gray-900/80" />
 
                                 <div className="p-4">
@@ -334,13 +334,13 @@ export default function Reports() {
                                             <p
                                                 className={cn(
                                                     "text-sm font-semibold",
-                                                    s.net_profit >= 0
+                                                    s.netProfit >= 0
                                                         ? "text-green-600"
                                                         : "text-red-600",
                                                 )}
                                             >
                                                 <AmountLabel
-                                                    value={s.net_profit}
+                                                    value={s.netProfit}
                                                 />
                                             </p>
                                             <p className="text-[11px] text-gray-400">
@@ -357,9 +357,7 @@ export default function Reports() {
                                             </p>
                                             <p className=" text-gray-900 mt-1">
                                                 <AmountLabel
-                                                    value={
-                                                        s.total_bookings_value
-                                                    }
+                                                    value={s.totalBookingsValue}
                                                 />
                                             </p>
                                         </div>
@@ -369,7 +367,7 @@ export default function Reports() {
                                             </p>
                                             <p className=" text-gray-900 mt-1">
                                                 <AmountLabel
-                                                    value={s.total_expenses}
+                                                    value={s.totalExpenses}
                                                 />
                                             </p>
                                         </div>
@@ -377,9 +375,9 @@ export default function Reports() {
                                             <p className="text-[11px] text-gray-400">
                                                 Earnings
                                             </p>
-                                            <p className=" text-gray-900 mt-1">
+                                            <p className="text-gray-900 mt-1">
                                                 <AmountLabel
-                                                    value={s.total_earnings}
+                                                    value={s.totalEarnings}
                                                 />
                                             </p>
                                         </div>
@@ -387,13 +385,13 @@ export default function Reports() {
                                             <p className="text-[11px] text-gray-400">
                                                 Report
                                             </p>
-                                            {s.property_id ===
+                                            {s.propertyId ===
                                             selectedProperty ? (
                                                 <p
                                                     className="text-brand font-medium mt-1"
                                                     onClick={() =>
                                                         downloadReports(
-                                                            s.property_id,
+                                                            s.propertyId,
                                                         )
                                                     }
                                                 >
@@ -404,7 +402,7 @@ export default function Reports() {
                                                     className="text-brand font-medium mt-1"
                                                     onClick={() =>
                                                         setSelectedProperty(
-                                                            s.property_id,
+                                                            s.propertyId,
                                                         )
                                                     }
                                                 >
@@ -428,17 +426,17 @@ export default function Reports() {
                                 right={
                                     <div className="text-xs text-gray-500">
                                         Total:{" "}
-                                        {reports?.total_bookings_count || 0}
+                                        {reports?.totalBookingsCount || 0}
                                     </div>
                                 }
                             >
-                                {!reports?.bookings_by_source?.length ? (
+                                {!reports?.bookingsBySource?.length ? (
                                     <div className="text-center text-gray-500 py-10 text-sm">
                                         No bookings for selected month
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        {reports.bookings_by_source.map(
+                                        {reports.bookingsBySource.map(
                                             (item, index) => (
                                                 <motion.div
                                                     key={item.source}
@@ -466,13 +464,13 @@ export default function Reports() {
                                 title="Expense Category"
                                 icon={DollarSign}
                             >
-                                {!reports?.expenses_by_category?.length ? (
+                                {!reports?.expensesByCategory?.length ? (
                                     <div className="text-center text-gray-500 py-10 text-sm">
                                         No expenses for selected month
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        {reports.expenses_by_category.map(
+                                        {reports.expensesByCategory.map(
                                             (item, index) => (
                                                 <motion.div
                                                     key={item.category}
@@ -500,13 +498,13 @@ export default function Reports() {
                                 title="Earning Sources"
                                 icon={Wallet}
                             >
-                                {!reports?.earnings_by_source?.length ? (
+                                {!reports?.earningsBySource?.length ? (
                                     <div className="text-center text-gray-500 py-10 text-sm">
                                         No earnings for selected month
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        {reports.earnings_by_source.map(
+                                        {reports.earningsBySource.map(
                                             (item, index) => (
                                                 <motion.div
                                                     key={item.source}

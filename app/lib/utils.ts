@@ -69,3 +69,21 @@ export function generateAndDownloadExcel(jsonSheets = [], filename) {
 
     XLSX.writeFile(workbook, filename);
 }
+
+export const loadDynamicScript = (
+    src = "",
+    type = "text/javascript",
+    async = true,
+) => {
+    // Check if script is already in the DOM
+    if (!src || document.querySelector(`script[src="${src}"]`)) {
+        return;
+    }
+
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = async;
+    script.type = type;
+    script.defer = true;
+    document.head.appendChild(script);
+};
