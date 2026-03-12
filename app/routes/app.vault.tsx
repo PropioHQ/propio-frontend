@@ -195,7 +195,6 @@ export default function Vault() {
                                                 ease: "easeOut",
                                                 delay: index * 0.03,
                                             }}
-                                            whileTap={{ scale: 0.985 }}
                                             className="hover:bg-gray-50 transition-colors"
                                         >
                                             <td className="px-4 py-4 text-sm text-gray-700">
@@ -290,7 +289,6 @@ export default function Vault() {
                                         ease: "easeOut",
                                         delay: index * 0.03,
                                     }}
-                                    whileTap={{ scale: 0.985 }}
                                     className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                                 >
                                     {/* Accent Strip */}

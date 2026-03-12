@@ -18,7 +18,7 @@ import {
     Wallet,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, Outlet, useLocation, useNavigate } from "react-router";
+import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 const NavItems = [
@@ -134,11 +134,6 @@ export default function AppLayout() {
                                     "rounded-full": collapsed,
                                 })}
                             />
-                            {!collapsed && (
-                                <p className="mb-4 text-xs text-gray-500 font-medium">
-                                    beta
-                                </p>
-                            )}
                         </div>
 
                         <button
@@ -159,12 +154,11 @@ export default function AppLayout() {
                                 const isActive =
                                     location.pathname === item.path;
                                 return (
-                                    <button
+                                    <Link
                                         key={item.path}
                                         data-testid={`nav-${item.label.toLowerCase()}`}
-                                        onClick={() =>
-                                            handleNavigation(item.path)
-                                        }
+                                        to={item.path}
+                                        prefetch="intent"
                                         className={cn(
                                             "flex flex-row items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-transform",
                                             isActive
@@ -178,7 +172,7 @@ export default function AppLayout() {
                                     >
                                         <Icon className="w-4 h-4 shrink-0" />
                                         {!collapsed && item.label}
-                                    </button>
+                                    </Link>
                                 );
                             })}
                         </nav>

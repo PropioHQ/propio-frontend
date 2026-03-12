@@ -56,6 +56,8 @@ const PropertyService = {
         country: string,
         role: string,
         type: PropertyType,
+        maxOccupancy: number,
+        ratePerNight: number,
     ) => {
         return await API.put("/api/v1/property", {
             propertyId,
@@ -65,6 +67,8 @@ const PropertyService = {
             country,
             role,
             type,
+            maxOccupancy,
+            ratePerNight,
         });
     },
 };

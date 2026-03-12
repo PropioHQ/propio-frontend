@@ -86,5 +86,6 @@ export enum DocumentType {
     LEGAL_NOTICE = "Legal Notice",
     IDENTITY_DOCUMENT = "Identity Document",
     PROPERTY_DOCUMENT = "Property Document",
+    AMC = "Annual Maintenance Contract",
     OTHER = "Other",
 }

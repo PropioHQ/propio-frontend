@@ -14,19 +14,20 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { BOOKING_KEY } from "@/querykeys";
+import { cn, handleNumberInput } from "@/lib/utils";
+import { BOOKING_KEY, PROPERTY_KEY } from "@/querykeys";
 import AttachmentService from "@/services/attachment.service";
 import BookingService from "@/services/booking.service";
 import { BookingPaymentMode, BookingSource } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Download, FileText, LoaderCircle, Upload, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import PropertyService from "@/services/property.service";
 
 const FILE_SIZE_MB = 5;
 
@@ -46,7 +47,8 @@ export default function BookingFormDialog({
 
     const [formData, setFormData] = useState({
         checkIn: new Date(),
-        checkOut: new Date(),
+        checkOut: dayjs().add(1, "day").toDate(),
+        ratePerNight: "",
         amount: "",
         bookingSource: BookingSource.DIRECT,
         guestName: "",
@@ -63,6 +65,12 @@ export default function BookingFormDialog({
         queryFn: () => BookingService.getBooking(bookingId, propertyId),
         enabled: Boolean(bookingId && propertyId),
         staleTime: 0,
+    });
+
+    const { data: property } = useQuery({
+        queryKey: [PROPERTY_KEY, propertyId],
+        queryFn: () => PropertyService.getProperty(propertyId),
+        enabled: Boolean(!bookingId && propertyId),
     });
 
     const onDrop = async (acceptedFiles) => {
@@ -128,6 +136,7 @@ export default function BookingFormDialog({
         let {
             checkIn,
             checkOut,
+            ratePerNight,
             amount,
             bookingSource,
             guestName,
@@ -137,6 +146,7 @@ export default function BookingFormDialog({
         }: {
             checkIn: Date;
             checkOut: Date;
+            ratePerNight: string | number;
             amount: string | number;
             bookingSource: BookingSource;
             guestName: string;
@@ -148,6 +158,7 @@ export default function BookingFormDialog({
         const required = [
             checkIn,
             checkOut,
+            ratePerNight,
             amount,
             bookingSource,
             guestName?.trim(),
@@ -160,16 +171,22 @@ export default function BookingFormDialog({
             return;
         }
 
-        amount = Number(amount);
+        ratePerNight = Number(ratePerNight);
         guestCount = Number(guestCount);
 
-        if (checkIn > checkOut) {
+        checkIn.setHours(0, 0, 0, 0);
+        checkOut.setHours(0, 0, 0, 0);
+
+        if (
+            dayjs(checkIn).isAfter(checkOut, "day") ||
+            dayjs(checkIn).isSame(checkOut, "day")
+        ) {
             toast.error("Check-in date should be before check-out date");
             return;
         }
 
-        if (isNaN(amount) || amount <= 0) {
-            toast.error("Please enter a valid amount");
+        if (isNaN(ratePerNight) || ratePerNight < 1) {
+            toast.error("Please enter a valid room rate");
             return;
         }
 
@@ -190,7 +207,7 @@ export default function BookingFormDialog({
                     guestCount,
                     checkIn,
                     checkOut,
-                    amount,
+                    ratePerNight,
                     bookingSource,
                     paymentMode,
                     note,
@@ -204,7 +221,7 @@ export default function BookingFormDialog({
                     guestCount,
                     checkIn,
                     checkOut,
-                    amount,
+                    ratePerNight,
                     bookingSource,
                     paymentMode,
                     note,
@@ -273,6 +290,44 @@ export default function BookingFormDialog({
         toast.info("File will be deleted upon saving.");
     };
 
+    const bookingNights: number = useMemo(() => {
+        const from = formData.checkIn;
+        const to = formData.checkOut;
+
+        // Return nights as 1
+        // If checkin & checkout date is same or not provided yet
+        if (!from || !to || dayjs(from).isSame(to, "day")) return 1;
+
+        // Normalize both to start of day, then calculate nights
+        const nights = dayjs(to)
+            .startOf("day")
+            .diff(dayjs(from).startOf("day"), "day");
+        return nights;
+    }, [formData.checkIn, formData.checkOut]);
+
+    useEffect(() => {
+        const ratePerNight: string = formData.ratePerNight;
+        let amount: number | string = Number(ratePerNight || 0) * bookingNights;
+
+        if (amount && !Number.isInteger(amount)) {
+            amount = amount.toFixed(2);
+        }
+
+        setFormData({
+            ...formData,
+            amount: amount.toString() || "",
+        });
+    }, [bookingNights, formData.ratePerNight]);
+
+    useEffect(() => {
+        if (property && !formData.ratePerNight) {
+            setFormData({
+                ...formData,
+                ratePerNight: property.ratePerNight || "",
+            });
+        }
+    }, [property]);
+
     useEffect(() => {
         const data = booking || prefill;
 
@@ -280,6 +335,7 @@ export default function BookingFormDialog({
             setFormData({
                 checkIn: new Date(data.checkIn),
                 checkOut: new Date(data.checkOut),
+                ratePerNight: data.ratePerNight,
                 amount: data.amount,
                 bookingSource: data.bookingSource,
                 guestName: data.guestName,
@@ -347,12 +403,24 @@ export default function BookingFormDialog({
                                             mode="single"
                                             className="w-full rounded-lg"
                                             selected={formData.checkIn}
-                                            onSelect={(d) =>
+                                            onSelect={(d) => {
+                                                const isCheckoutBefore =
+                                                    formData.checkOut
+                                                        ? dayjs(
+                                                              formData.checkOut,
+                                                          ).isBefore(d, "day")
+                                                        : false;
+
                                                 setFormData({
                                                     ...formData,
                                                     checkIn: d,
-                                                })
-                                            }
+                                                    checkOut: isCheckoutBefore
+                                                        ? dayjs(d)
+                                                              .add(1, "day")
+                                                              .toDate()
+                                                        : formData.checkOut,
+                                                });
+                                            }}
                                             defaultMonth={
                                                 formData.checkIn || new Date()
                                             }
@@ -385,8 +453,8 @@ export default function BookingFormDialog({
                                         align="start"
                                     >
                                         <Calendar
-                                            className="w-full rounded-lg"
                                             mode="single"
+                                            className="w-full rounded-lg"
                                             selected={formData.checkOut}
                                             onSelect={(d) =>
                                                 setFormData({
@@ -396,6 +464,16 @@ export default function BookingFormDialog({
                                             }
                                             defaultMonth={
                                                 formData.checkOut || new Date()
+                                            }
+                                            disabled={(date) =>
+                                                formData.checkIn
+                                                    ? dayjs(date).isBefore(
+                                                          dayjs(
+                                                              formData.checkIn,
+                                                          ).add(1, "day"),
+                                                          "day",
+                                                      )
+                                                    : false
                                             }
                                         />
                                     </PopoverContent>
@@ -427,15 +505,12 @@ export default function BookingFormDialog({
                                     required
                                     value={formData.guestCount}
                                     onChange={(e) => {
-                                        const v = Number(e.target.value);
-                                        const guestCount =
-                                            isNaN(v) || !v
-                                                ? ""
-                                                : Math.abs(v).toString();
-
                                         setFormData({
                                             ...formData,
-                                            guestCount,
+                                            guestCount: handleNumberInput(
+                                                e,
+                                                false,
+                                            ),
                                         });
                                     }}
                                     className="mt-1"
@@ -443,27 +518,42 @@ export default function BookingFormDialog({
                             </div>
                         </div>
 
-                        <div>
-                            <Label>Amount *</Label>
-                            <Input
-                                type="text"
-                                required
-                                min={0}
-                                value={formData.amount}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    const amount =
-                                        isNaN(v) || !v
-                                            ? ""
-                                            : Math.abs(v).toString();
-
-                                    setFormData({
-                                        ...formData,
-                                        amount,
-                                    });
-                                }}
-                                className="mt-1"
-                            />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label>Room rate *</Label>
+                                <Input
+                                    type="text"
+                                    required
+                                    min={0}
+                                    value={formData.ratePerNight}
+                                    onChange={(e) => {
+                                        setFormData({
+                                            ...formData,
+                                            ratePerNight: handleNumberInput(e),
+                                        });
+                                    }}
+                                    className="mt-1"
+                                />
+                                <span className="text-xs text-gray-400">
+                                    Inclusive of taxes
+                                </span>
+                            </div>
+                            <div>
+                                <Label>Amount *</Label>
+                                <Input
+                                    type="text"
+                                    required
+                                    min={0}
+                                    value={Number(
+                                        formData.amount,
+                                    ).toLocaleString()}
+                                    className="mt-1"
+                                    disabled
+                                />
+                                <span className="text-xs text-gray-400">
+                                    Rate per night x {bookingNights} night(s)
+                                </span>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -625,7 +715,7 @@ export default function BookingFormDialog({
                                             or click to browse
                                         </p>
                                         <p className="text-xs text-gray-400 mt-2">
-                                            PDF, PNG, JPG, or HEIC
+                                            PDF, PNG, JPG
                                         </p>
                                     </>
                                 )}

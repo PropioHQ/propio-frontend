@@ -1,10 +1,53 @@
 import type { ClassValue } from "class-variance-authority/types";
 import { clsx } from "clsx";
+import type { ChangeEvent } from "react";
 import { twMerge } from "tailwind-merge";
 import XLSX from "xlsx";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
+}
+
+export function handleNumberInput(
+    e: ChangeEvent<HTMLInputElement>,
+    allowDecimal = true,
+): string {
+    let inputValue = e.target.value;
+
+    if (inputValue === "" || inputValue === "-") {
+        return "";
+    }
+
+    // Strip duplicate trailing decimal point (e.g. "1.5." → "1.5")
+    if (
+        allowDecimal &&
+        inputValue.endsWith(".") &&
+        inputValue.indexOf(".") !== inputValue.length - 1
+    ) {
+        inputValue = inputValue.slice(0, -1);
+    }
+
+    // Allow intermediate decimal states like "1." or "1.0"
+    const decimalInProgress = allowDecimal && /^\d*\.\d*$/.test(inputValue);
+
+    const v = Number(inputValue);
+
+    if (isNaN(v)) {
+        return "";
+    }
+
+    const absValue = Math.abs(v);
+
+    if (!allowDecimal) {
+        return Math.floor(absValue).toString();
+    }
+
+    // Preserve the raw input if it's a valid partial decimal (e.g. "1.", "1.50")
+    if (decimalInProgress) {
+        return inputValue.startsWith("-") ? inputValue.slice(1) : inputValue;
+    }
+
+    return absValue.toString();
 }
 
 export function setAuthToken(token: string) {

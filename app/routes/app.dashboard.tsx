@@ -41,7 +41,6 @@ const SummaryCard = ({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
-        whileTap={{ scale: 0.985 }}
         className="bg-white border border-gray-200 rounded-xl p-5 md:p-6 transition-colors shadow-2xs hover:border-gray-300"
     >
         <div className="flex items-center justify-between mb-3">

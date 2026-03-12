@@ -179,7 +179,7 @@ export default function LandingPage() {
         },
         {
             name: "Master",
-            price: "₹1,799",
+            price: "₹1,899",
             period: "month",
             properties: 20,
             popular: false,

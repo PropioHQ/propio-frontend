@@ -88,6 +88,8 @@ const badgeVariants = cva(
                     "border-transparent bg-indigo-50 text-indigo-700 hover:bg-indigo-200",
                 [DocumentType.RENTAL_AGREEMENT]:
                     "border-transparent bg-rose-50 text-rose-700 hover:bg-rose-200",
+                [DocumentType.AMC]:
+                    "border-transparent bg-amber-50 text-amber-700 hover:bg-amber-200",
             },
         },
         defaultVariants: {

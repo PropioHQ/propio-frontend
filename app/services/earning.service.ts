@@ -23,8 +23,9 @@ const EarningService = {
         recordDate: Date,
         earningSource: BookingSource,
         tdsValue: number,
-        gstValue: number,
+        tcsValue: number,
         grossAmount: number,
+        transactionRef: string,
         note: string,
         attachmentIds: string[],
     ) => {
@@ -33,8 +34,9 @@ const EarningService = {
             recordDate,
             earningSource,
             tdsValue,
-            gstValue,
+            tcsValue,
             grossAmount,
+            transactionRef,
             note,
             attachmentIds,
         });
@@ -45,8 +47,9 @@ const EarningService = {
         recordDate: Date,
         earningSource: BookingSource,
         tdsValue: number,
-        gstValue: number,
+        tcsValue: number,
         grossAmount: number,
+        transactionRef: string,
         note: string,
         attachmentIds: string[],
     ) => {
@@ -56,8 +59,9 @@ const EarningService = {
             recordDate,
             earningSource,
             tdsValue,
-            gstValue,
+            tcsValue,
             grossAmount,
+            transactionRef,
             note,
             attachmentIds,
         });

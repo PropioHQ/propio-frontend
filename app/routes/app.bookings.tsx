@@ -31,12 +31,10 @@ export default function Bookings() {
     const [selectedBooking, setSelectedBooking] = useState("");
     const [scannedBooking, setScannedBooking] = useState(null);
 
-    const [selectedYear, setSelectedYear] = useState<number>(() =>
-        dayjs().get("year"),
-    );
-    const [selectedMonth, setSelectedMonth] = useState<number>(
-        () => dayjs().get("month") + 1,
-    );
+    const [selectedDate, setSelectedDate] = useState({
+        month: dayjs().get("month") + 1,
+        year: dayjs().get("year"),
+    });
 
     const { data: properties = [], isLoading: propertiesLoading } = useQuery({
         queryKey: [PROPERTIES_KEY],
@@ -45,12 +43,17 @@ export default function Bookings() {
     });
 
     const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
-        queryKey: [BOOKINGS_KEY, selectedMonth, selectedYear, selectedProperty],
+        queryKey: [
+            BOOKINGS_KEY,
+            selectedDate.month,
+            selectedDate.year,
+            selectedProperty,
+        ],
         queryFn: () =>
             BookingService.getBookings(
                 selectedProperty,
-                selectedMonth,
-                selectedYear,
+                selectedDate.month,
+                selectedDate.year,
             ),
         staleTime: 5 * 60 * 1000, // 5 minutes
         enabled: !!selectedProperty && !propertiesLoading,
@@ -60,8 +63,8 @@ export default function Bookings() {
         queryClient.invalidateQueries({
             queryKey: [
                 BOOKINGS_KEY,
-                selectedMonth,
-                selectedYear,
+                selectedDate.month,
+                selectedDate.year,
                 selectedProperty,
             ],
         });
@@ -115,15 +118,19 @@ export default function Bookings() {
                     <h1 className="text-3xl sm:text-4xl font-bold">Bookings</h1>
                     <div className="mt-1 flex flex-row gap-1.5 items-center text-gray-600">
                         <MonthYearPopover
-                            month={selectedMonth}
-                            year={selectedYear}
-                            onMonthSelect={setSelectedMonth}
-                            onYearSelect={setSelectedYear}
+                            month={selectedDate.month}
+                            year={selectedDate.year}
+                            onChange={(m, y) =>
+                                setSelectedDate({
+                                    month: m,
+                                    year: y,
+                                })
+                            }
                         >
                             <p className="underline decoration-dashed decoration-1 decoration decoration-gray-500 underline-offset-4 cursor-pointer">
                                 {dayjs()
-                                    .set("month", selectedMonth - 1)
-                                    .set("year", selectedYear)
+                                    .set("month", selectedDate.month - 1)
+                                    .set("year", selectedDate.year)
                                     .format("MMMM YYYY")}{" "}
                             </p>
                         </MonthYearPopover>
@@ -204,7 +211,6 @@ export default function Bookings() {
                                                 ease: "easeOut",
                                                 delay: index * 0.03,
                                             }}
-                                            whileTap={{ scale: 0.985 }}
                                             className="hover:bg-gray-50 transition-colors"
                                         >
                                             <td className="px-4 py-4 text-sm text-gray-700">
@@ -275,7 +281,6 @@ export default function Bookings() {
                                         ease: "easeOut",
                                         delay: index * 0.03,
                                     }}
-                                    whileTap={{ scale: 0.985 }}
                                     className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm active:shadow-md transition-shadow"
                                 >
                                     {/* Accent Strip */}

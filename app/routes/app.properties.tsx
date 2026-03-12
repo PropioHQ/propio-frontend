@@ -60,7 +60,23 @@ export default function Properties() {
                 </div>
                 <Button
                     data-testid="add-expense-button"
-                    onClick={() => setIsDialogOpen(true)}
+                    onClick={() => {
+                        if (properties.length) {
+                            // Prefill last property details
+                            // For ease of entering data
+                            const lastprop = {
+                                ...properties[properties.length - 1],
+                            };
+
+                            // Important:
+                            // Remove "_id" & "name" to avoid triggering update
+                            lastprop._id = null;
+                            lastprop.name = "";
+
+                            setSelectedProperty(lastprop);
+                        }
+                        setIsDialogOpen(true);
+                    }}
                 >
                     <Plus className="w-4 h-4 mr-2" />
                     New Property
@@ -73,13 +89,16 @@ export default function Properties() {
                     <thead>
                         <tr className="border-b bg-gray-50">
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                Property Name
+                                Property
                             </th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                 Type
                             </th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                 Location
+                            </th>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                Room Rate
                             </th>
                             <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
                                 Status
@@ -114,6 +133,11 @@ export default function Properties() {
                                     <span>
                                         {property.city}, {property.state}
                                     </span>
+                                </td>
+                                <td className="px-4 py-4 text-sm text-gray-700">
+                                    {property.ratePerNight
+                                        ? `₹${property.ratePerNight}`
+                                        : ""}
                                 </td>
                                 <td className="px-4 py-4 text-center text-gray-700">
                                     {property.isActive ? (
@@ -256,7 +280,7 @@ export default function Properties() {
                     <DialogContent aria-describedby="Property Form">
                         <DialogHeader>
                             <DialogTitle>
-                                {selectedProperty
+                                {selectedProperty?._id
                                     ? "Update Property"
                                     : "Add Property"}
                             </DialogTitle>
@@ -265,7 +289,9 @@ export default function Properties() {
                         <PropertyForm
                             onSuccess={onSuccess}
                             onBack={() => setIsDialogOpen(false)}
-                            property={selectedProperty}
+                            propertyId={selectedProperty?._id}
+                            prefill={selectedProperty}
+                            optionalFields
                         />
                     </DialogContent>
                 </Dialog>

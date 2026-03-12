@@ -240,7 +240,7 @@ export default function OcrFormDialog({
                                     or click to browse
                                 </p>
                                 <p className="text-xs text-gray-400 mt-2">
-                                    PDF, PNG, JPG, or HEIC
+                                    PDF, PNG, JPG
                                 </p>
                             </div>
                         </div>

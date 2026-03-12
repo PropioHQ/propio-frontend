@@ -7,44 +7,41 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { handleNumberInput } from "@/lib/utils";
 import {
     COUNTRIES_KEY,
     COUNTRY_STATES_KEY,
-    PROPERTIES_KEY,
-    PROPERTY_COUNT_KEY,
-    PROPERTY_KEY,
+    ORGANIZATION_KEY,
+    ORGANIZATIONS_KEY,
 } from "@/querykeys";
 import ConstantsService from "@/services/constants.service";
-import PropertyService from "@/services/property.service";
-import { PropertyType, UserRoles } from "@/types";
+import OrganizationService from "@/services/organization.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 
-const PROPERTY_NAME_LENGTH = 60; // 60 characters
+const ORGANIZATION_NAME_LENGTH = 60; // 60 characters
 
-export default function PropertyForm({
-    onBack,
+export default function OrganizationForm({
     onSuccess,
-    propertyId = null,
+    organizationId = null,
     prefill = null,
     optionalFields = false,
 }) {
     const queryClient = useQueryClient();
 
     const [submitting, setSubmitting] = useState(false);
-    const [propertyData, setPropertyData] = useState({
+    const [organizationData, setOrganizationData] = useState({
         name: "",
+        street: "",
         city: "",
         state: "",
         country: "",
-        role: UserRoles.OWNER,
-        type: PropertyType.APARTMENT,
-        maxOccupancy: "",
-        ratePerNight: "",
+        registrationNumber: "",
+        taxEnabled: false,
+        taxSystem: "",
+        taxIdentification: "",
     });
 
     const { data: countries = [] } = useQuery({
@@ -54,81 +51,82 @@ export default function PropertyForm({
     });
 
     const { data: states = [] } = useQuery({
-        queryKey: [COUNTRY_STATES_KEY, propertyData.country],
+        queryKey: [COUNTRY_STATES_KEY, organizationData.country],
         queryFn: () =>
-            ConstantsService.getStatesByCountry(propertyData.country),
-        enabled: !!propertyData.country,
+            ConstantsService.getStatesByCountry(organizationData.country),
+        enabled: !!organizationData.country,
         staleTime: Infinity,
     });
 
     const handleSubmit = async () => {
         let {
             name,
+            street,
             city,
             state,
             country,
-            role,
-            type,
-            maxOccupancy,
-            ratePerNight,
-        } = propertyData;
+            registrationNumber,
+            taxEnabled,
+            taxSystem,
+            taxIdentification,
+        } = organizationData;
         name = name.trim();
         city = city.trim();
 
-        if (!name || !city || !state || !country || !role || !type) {
+        if (!name || !city || !state || !country) {
             toast.error("All fields are required");
             return;
         }
 
-        if (name.length > PROPERTY_NAME_LENGTH) {
+        if (name.length > ORGANIZATION_NAME_LENGTH) {
             toast.error(
-                `Max ${PROPERTY_NAME_LENGTH} characters are allowed for property name`,
+                `Max ${ORGANIZATION_NAME_LENGTH} characters are allowed for organization name`,
             );
             return;
         }
 
+        const taxConfig = {
+            enabled: Boolean(taxEnabled),
+            system: taxSystem,
+            identification: taxIdentification,
+        };
+
         setSubmitting(true);
         try {
-            if (propertyId) {
-                await PropertyService.updateProperty(
-                    propertyId,
+            if (organizationId) {
+                await OrganizationService.updateOrganization(
+                    organizationId,
                     name,
+                    street,
                     city,
                     state,
                     country,
-                    role,
-                    type,
-                    Number(maxOccupancy || 0),
-                    Number(ratePerNight || 0),
+                    registrationNumber,
+                    taxConfig,
                 );
-                toast.success("Property details updated successfully!");
+                toast.success("Organization details updated successfully!");
                 queryClient.invalidateQueries({
-                    queryKey: [PROPERTY_KEY, propertyId],
+                    queryKey: [ORGANIZATION_KEY, organizationId],
                 });
             } else {
-                await PropertyService.addProperty(
+                await OrganizationService.addOrganization(
                     name,
+                    street,
                     city,
                     state,
                     country,
-                    role,
-                    type,
                 );
-                toast.success("Property added successfully!");
+                toast.success("Organization details added successfully!");
             }
 
-            // Refresh property count
+            // Refresh organizations entries
             queryClient.invalidateQueries({
-                queryKey: [PROPERTY_COUNT_KEY],
-            });
-            // Refresh property entries
-            queryClient.invalidateQueries({
-                queryKey: [PROPERTIES_KEY],
+                queryKey: [ORGANIZATIONS_KEY],
             });
 
             onSuccess && onSuccess();
         } catch (error) {
-            toast.error(error.message || "Failed to add property");
+            toast.error(error.message || "Failed to add organization");
         } finally {
             setSubmitting(false);
         }
@@ -136,7 +134,7 @@ export default function PropertyForm({
 
     useEffect(() => {
         if (countries && countries.length > 0) {
-            setPropertyData((prev) => {
+            setOrganizationData((prev) => {
                 if (!prev.country) {
                     return { ...prev, country: countries[0] };
                 }
@@ -147,15 +145,16 @@ export default function PropertyForm({
 
     useEffect(() => {
         if (prefill) {
-            setPropertyData({
+            setOrganizationData({
                 name: prefill.name || "",
+                street: prefill.street || "",
                 city: prefill.city || "",
                 state: prefill.state || "",
                 country: prefill.country || "",
-                role: (prefill.role || "") as UserRoles,
-                type: (prefill.type || "") as PropertyType,
-                maxOccupancy: prefill.maxOccupancy || "",
-                ratePerNight: prefill.ratePerNight || "",
+                registrationNumber: prefill.registrationNumber || "",
+                taxEnabled: prefill.taxConfig?.enabled || false,
+                taxSystem: prefill.taxConfig?.system || "",
+                taxIdentification: prefill.taxConfig?.identification || "",
             });
         }
     }, [prefill]);
@@ -163,22 +162,22 @@ export default function PropertyForm({
     return (
         <div className="space-y-6">
             <div>
-                <Label htmlFor="property-name">Property name *</Label>
+                <Label htmlFor="organization-name">Organization name *</Label>
                 <Input
-                    id="property-name"
-                    data-testid="property-name-input"
+                    id="organization-name"
+                    data-testid="organization-name-input"
                     type="text"
-                    placeholder="e.g., Beach Villa, Mountain Cottage"
-                    value={propertyData.name}
+                    placeholder="e.g., Season Stays PVT LTD"
+                    value={organizationData.name}
                     onChange={(e) =>
-                        setPropertyData({
-                            ...propertyData,
+                        setOrganizationData({
+                            ...organizationData,
                             name: e.target.value,
                         })
                     }
                     required
                     className="mt-2 text-base"
-                    maxLength={PROPERTY_NAME_LENGTH}
+                    maxLength={ORGANIZATION_NAME_LENGTH}
                 />
             </div>
 
@@ -186,16 +185,17 @@ export default function PropertyForm({
                 <div>
                     <Label htmlFor="country">Country *</Label>
                     <Select
-                        key={propertyData.country}
-                        value={propertyData.country}
+                        key={organizationData.country}
+                        value={organizationData.country}
                         onValueChange={(value) =>
-                            setPropertyData({
-                                ...propertyData,
+                            setOrganizationData({
+                                ...organizationData,
                                 country: value,
                                 state: "",
                             })
                         }
                         required
+                        disabled={Boolean(organizationId)}
                     >
                         <SelectTrigger
                             data-testid="country-select"
@@ -222,15 +222,17 @@ export default function PropertyForm({
                 <div>
                     <Label htmlFor="state">State *</Label>
                     <Select
-                        key={propertyData.state}
-                        value={propertyData.state}
+                        key={organizationData.state}
+                        value={organizationData.state}
                         onValueChange={(value) =>
-                            setPropertyData({
-                                ...propertyData,
+                            setOrganizationData({
+                                ...organizationData,
                                 state: value,
                             })
                         }
-                        disabled={!propertyData.country}
+                        disabled={Boolean(
+                            !organizationData.country || organizationId,
+                        )}
                         required
                     >
                         <SelectTrigger
@@ -264,10 +266,10 @@ export default function PropertyForm({
                         data-testid="city-input"
                         type="text"
                         placeholder="e.g., Goa, Manali"
-                        value={propertyData.city}
+                        value={organizationData.city}
                         onChange={(e) =>
-                            setPropertyData({
-                                ...propertyData,
+                            setOrganizationData({
+                                ...organizationData,
                                 city: e.target.value,
                             })
                         }
@@ -276,84 +278,37 @@ export default function PropertyForm({
                     />
                 </div>
                 <div>
-                    <Label htmlFor="role">Role *</Label>
-                    <Select
-                        value={propertyData.role}
-                        onValueChange={(value) =>
-                            setPropertyData({
-                                ...propertyData,
-                                role: value as UserRoles,
+                    <Label htmlFor="street">Street</Label>
+                    <Input
+                        id="street"
+                        data-testid="street-input"
+                        type="text"
+                        placeholder="e.g., 121F, 13th Block"
+                        value={organizationData.street}
+                        onChange={(e) =>
+                            setOrganizationData({
+                                ...organizationData,
+                                street: e.target.value,
                             })
                         }
                         required
-                    >
-                        <SelectTrigger
-                            data-testid="role-select"
-                            className="mt-2"
-                        >
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent
-                            position="popper"
-                            side="bottom"
-                            align="start"
-                            sideOffset={4}
-                            className="max-h-64 overflow-y-auto"
-                        >
-                            {Object.values(UserRoles).map((role) => (
-                                <SelectItem key={role} value={role}>
-                                    {role}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                        className="mt-2 text-base"
+                    />
                 </div>
             </div>
 
-            <div>
-                <Label htmlFor="type">Property type *</Label>
-                <Select
-                    key={propertyData.type}
-                    value={propertyData.type}
-                    onValueChange={(value) =>
-                        setPropertyData({
-                            ...propertyData,
-                            type: value as PropertyType,
-                        })
-                    }
-                    required
-                >
-                    <SelectTrigger data-testid="type-select" className="mt-2">
-                        <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent
-                        position="popper"
-                        side="bottom"
-                        align="start"
-                        sideOffset={4}
-                        className="max-h-64 overflow-y-auto"
-                    >
-                        {Object.values(PropertyType).map((type) => (
-                            <SelectItem key={type} value={type}>
-                                {type}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-
-            {optionalFields ? (
+            {/* {optionalFields ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <Label htmlFor="max-occupancy">Max occupancy</Label>
                         <Input
                             name="max-occupancy"
                             type="text"
-                            value={propertyData.maxOccupancy}
+                            value={organizationData.maxOccupancy}
                             placeholder="2 Guest(s)"
                             onChange={(e) => {
-                                setPropertyData({
-                                    ...propertyData,
+                                setOrganizationData({
+                                    ...organizationData,
                                     maxOccupancy: handleNumberInput(e, false),
                                 });
                             }}
@@ -365,11 +320,11 @@ export default function PropertyForm({
                         <Input
                             name="rate-per-night"
                             type="text"
-                            value={propertyData.ratePerNight}
+                            value={organizationData.ratePerNight}
                             placeholder="3500"
                             onChange={(e) => {
-                                setPropertyData({
-                                    ...propertyData,
+                                setOrganizationData({
+                                    ...organizationData,
                                     ratePerNight: handleNumberInput(e),
                                 });
                             }}
@@ -377,20 +332,11 @@ export default function PropertyForm({
                         />
                     </div>
                 </div>
-            ) : null}
+            ) : null} */}
 
-            <div className="flex gap-3 pt-4">
+            <div className="pt-4">
                 <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onBack}
-                    className="flex-1"
-                    disabled={submitting}
-                >
-                    Back
-                </Button>
-                <Button
-                    data-testid="save-property-button"
+                    data-testid="save-organization-button"
                     onClick={handleSubmit}
                     className="flex-1 bg-gray-900 hover:bg-gray-800"
                     disabled={submitting}
@@ -399,7 +345,7 @@ export default function PropertyForm({
                         <>
                             {"Saving"} <LoaderCircle className="animate-spin" />
                         </>
-                    ) : propertyId ? (
+                    ) : organizationId ? (
                         "Update"
                     ) : (
                         "Submit"

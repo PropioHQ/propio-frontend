@@ -4,8 +4,9 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
-import { Label } from "./ui/label";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { Button } from "./ui/button";
 
 const MONTHS = [
     "January",
@@ -22,80 +23,65 @@ const MONTHS = [
     "December",
 ];
 
-const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from(
-    { length: CURRENT_YEAR - 2020 },
-    (_, i) => CURRENT_YEAR - i,
-);
-
 export default function MonthYearPopover({
     month,
     year,
     children,
-    onMonthSelect,
-    onYearSelect,
+    onChange,
 }: {
     month: number;
     year: number;
     children: React.ReactNode;
-    onMonthSelect: (month: number) => void;
-    onYearSelect: (year: number) => void;
+    onChange: (month: number, year: number) => void;
 }) {
+    const [activeYear, setActiveYear] = useState<number>(year);
+
+    const onSelect = async (month: number) => {
+        onChange(month, activeYear);
+    };
+
     return (
         <Popover modal>
             <PopoverTrigger asChild>{children}</PopoverTrigger>
-            <PopoverContent align="start" className="w-fit h-100">
-                <div className="w-full h-full grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1.5 overflow-y-auto thin-scrollbar pr-6">
-                        <Label className="px-2 py-0.5 mb-2">Month</Label>
-                        {MONTHS.map((m, idx) => (
-                            <div
+            <PopoverContent align="start" className="w-fit p-3">
+                {/* Year navigation */}
+                <div className="flex items-center justify-between mb-3">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setActiveYear(activeYear - 1)}
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <span className="text-sm font-semibold text-gray-800">
+                        {activeYear}
+                    </span>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setActiveYear(activeYear + 1)}
+                    >
+                        <ChevronRight className="w-4 h-4" />
+                    </Button>
+                </div>
+
+                {/* Month grid */}
+                <div className="grid grid-cols-3 gap-2">
+                    {MONTHS.map((m, idx) => {
+                        const isSelected =
+                            idx + 1 === month && year === activeYear;
+                        return (
+                            <Button
                                 key={m}
-                                className={cn(
-                                    "flex flex-row items-center justify-between text-sm hover:bg-gray-50 rounded-md px-2 py-1 cursor-pointer",
-                                    idx + 1 === month
-                                        ? "text-gray-800 font-medium"
-                                        : "text-gray-600",
-                                )}
-                                onClick={() => onMonthSelect(idx + 1)}
+                                onClick={() => onSelect(idx + 1)}
+                                variant={isSelected ? "default" : "ghost"}
+                                size="default"
+                                className="h-8 px-3"
                             >
-                                <span className="flex-1">{m}</span>
-                                <Check
-                                    className={cn(
-                                        "w-4 h-4 text-gray-900 shrink-0",
-                                        {
-                                            invisible: idx + 1 !== month,
-                                        },
-                                    )}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                    <div className="flex flex-col gap-1.5 overflow-y-auto thin-scrollbar">
-                        <Label className="px-2 py-0.5 mb-2">Year</Label>
-                        {YEARS.map((y) => (
-                            <div
-                                key={y}
-                                className={cn(
-                                    "flex flex-row items-center justify-between text-sm hover:bg-gray-50 rounded-md px-2 py-1.5 cursor-pointer",
-                                    y === year
-                                        ? "text-gray-800 font-medium"
-                                        : "text-gray-600",
-                                )}
-                                onClick={() => onYearSelect(y)}
-                            >
-                                <span className="flex-1">{y}</span>
-                                <Check
-                                    className={cn(
-                                        "w-4 h-4 text-gray-900 shrink-0",
-                                        {
-                                            invisible: y !== year,
-                                        },
-                                    )}
-                                />
-                            </div>
-                        ))}
-                    </div>
+                                {m.slice(0, 3)}
+                            </Button>
+                        );
+                    })}
                 </div>
             </PopoverContent>
         </Popover>

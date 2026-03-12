@@ -227,7 +227,7 @@ export default function Reports() {
                                         Earnings
                                     </th>
                                     <th className="px-5 py-4 text-left font-semibold">
-                                        Taxes
+                                        Tax Retained
                                     </th>
                                     <th className="px-5 py-4 text-left font-semibold">
                                         Net Profit
@@ -264,7 +264,9 @@ export default function Reports() {
                                             />
                                         </td>
                                         <td className="px-5 py-4 text-gray-700">
-                                            <AmountLabel value={s.taxes} />
+                                            <AmountLabel
+                                                value={s.withHoldingTax}
+                                            />
                                         </td>
                                         <td
                                             className={cn(

@@ -14,7 +14,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, handleNumberInput } from "@/lib/utils";
 import { EARNING_KEY } from "@/querykeys";
 import AttachmentService from "@/services/attachment.service";
 import EarningService from "@/services/earning.service";
@@ -32,8 +32,10 @@ interface FormDataSchema {
     recordDate: Date;
     earningSource: BookingSource;
     tdsValue: number | string;
-    gstValue: number | string;
+    tcsValue: number | string;
     grossAmount: number | string;
+    netAmount: number | string;
+    transactionRef: string;
     note: string;
 }
 
@@ -56,8 +58,10 @@ export default function EarningFormDialog({
         recordDate: new Date(),
         earningSource: "" as BookingSource,
         tdsValue: "",
-        gstValue: "",
+        tcsValue: "",
         grossAmount: "",
+        netAmount: "",
+        transactionRef: "",
         note: "",
     });
 
@@ -134,12 +138,14 @@ export default function EarningFormDialog({
             recordDate,
             earningSource,
             tdsValue,
-            gstValue,
+            tcsValue,
             grossAmount,
+            netAmount,
+            transactionRef,
             note,
         }: FormDataSchema = formData;
 
-        const required = [recordDate, earningSource, grossAmount];
+        const required = [recordDate, earningSource, grossAmount, netAmount];
 
         if (required.some((v) => !v)) {
             toast.error("Please fill all required fields");
@@ -148,7 +154,7 @@ export default function EarningFormDialog({
 
         grossAmount = Number(grossAmount);
         tdsValue = Number(tdsValue);
-        gstValue = Number(gstValue);
+        tcsValue = Number(tcsValue);
 
         if (isNaN(grossAmount) || grossAmount <= 0) {
             toast.error("Please enter a valid gross amount");
@@ -166,8 +172,9 @@ export default function EarningFormDialog({
                     recordDate,
                     earningSource,
                     tdsValue,
-                    gstValue,
+                    tcsValue,
                     grossAmount,
+                    transactionRef,
                     note,
                     attachmentIds,
                 );
@@ -178,8 +185,9 @@ export default function EarningFormDialog({
                     recordDate,
                     earningSource,
                     tdsValue,
-                    gstValue,
+                    tcsValue,
                     grossAmount,
+                    transactionRef,
                     note,
                     attachmentIds,
                 );
@@ -253,13 +261,25 @@ export default function EarningFormDialog({
     }, [formData.recordDate]);
 
     useEffect(() => {
+        setFormData({
+            ...formData,
+            netAmount:
+                Number(formData.grossAmount) -
+                Number(formData.tcsValue) -
+                Number(formData.tdsValue),
+        });
+    }, [formData.grossAmount, formData.tcsValue, formData.tdsValue]);
+
+    useEffect(() => {
         if (earning) {
             setFormData({
                 recordDate: new Date(earning.recordDate),
                 earningSource: earning.earningSource,
-                tdsValue: earning.tdsValue,
-                gstValue: earning.gstValue,
+                tdsValue: earning.tdsValue || "",
+                tcsValue: earning.tcsValue || "",
                 grossAmount: earning.grossAmount,
+                netAmount: earning.netAmount,
+                transactionRef: earning.transactionRef || "",
                 note: earning.note || "",
             });
 
@@ -293,7 +313,7 @@ export default function EarningFormDialog({
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-4 items-baseline">
                             <div className="flex flex-col justify-end">
                                 <Label>Record date *</Label>
                                 <Popover modal>
@@ -335,9 +355,8 @@ export default function EarningFormDialog({
                                     </PopoverContent>
                                 </Popover>
                                 {isRecordDateYearOld ? (
-                                    <p className="bg-yellow-50 text-yellow-900 mt-2 p-1 font-medium rounded-sm text-xs w-fit">
-                                        Note: Record date is older than current
-                                        year
+                                    <p className="bg-yellow-50 text-yellow-900 mt-2 p-1 rounded-sm text-xs w-fit">
+                                        Record date is older than current year
                                     </p>
                                 ) : null}
                             </div>
@@ -374,72 +393,89 @@ export default function EarningFormDialog({
                             </div>
                         </div>
 
-                        <div>
-                            <Label>Received amount *</Label>
-                            <Input
-                                type="text"
-                                required
-                                min={0}
-                                value={formData.grossAmount}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    const amount =
-                                        isNaN(v) || !v
-                                            ? ""
-                                            : Math.abs(v).toString();
-
-                                    setFormData({
-                                        ...formData,
-                                        grossAmount: amount,
-                                    });
-                                }}
-                                className="mt-1"
-                            />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label>Received amount *</Label>
+                                <Input
+                                    type="text"
+                                    required
+                                    min={0}
+                                    value={formData.grossAmount}
+                                    onChange={(e) => {
+                                        setFormData({
+                                            ...formData,
+                                            grossAmount: handleNumberInput(e),
+                                        });
+                                    }}
+                                    className="mt-1"
+                                />
+                                <span className="text-xs text-gray-400">
+                                    Pre-tax deduction
+                                </span>
+                            </div>
+                            <div>
+                                <Label>Net cash received</Label>
+                                <Input
+                                    type="text"
+                                    required
+                                    min={0}
+                                    value={Number(
+                                        formData.netAmount,
+                                    ).toLocaleString()}
+                                    className="mt-1"
+                                    disabled
+                                />
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label>GST amount</Label>
+                                <Label>Tax collected (TCS)</Label>
                                 <Input
                                     type="text"
                                     min={0}
-                                    value={formData.gstValue}
+                                    value={formData.tcsValue}
                                     onChange={(e) => {
-                                        const v = Number(e.target.value);
-                                        const amount =
-                                            isNaN(v) || !v
-                                                ? ""
-                                                : Math.abs(v).toString();
-
                                         setFormData({
                                             ...formData,
-                                            gstValue: amount,
+                                            tcsValue: handleNumberInput(e),
                                         });
                                     }}
                                     className="mt-1"
                                 />
                             </div>
                             <div>
-                                <Label>TDS amount</Label>
+                                <Label>Tax deducted (TDS)</Label>
                                 <Input
                                     type="text"
                                     min={0}
                                     value={formData.tdsValue}
                                     onChange={(e) => {
-                                        const v = Number(e.target.value);
-                                        const amount =
-                                            isNaN(v) || !v
-                                                ? ""
-                                                : Math.abs(v).toString();
-
                                         setFormData({
                                             ...formData,
-                                            tdsValue: amount,
+                                            tdsValue: handleNumberInput(e),
                                         });
                                     }}
                                     className="mt-1"
                                 />
                             </div>
+                        </div>
+
+                        <div>
+                            <Label>Transaction reference</Label>
+                            <Input
+                                type="text"
+                                min={0}
+                                value={formData.transactionRef}
+                                onChange={(e) => {
+                                    setFormData({
+                                        ...formData,
+                                        transactionRef: e.target.value,
+                                    });
+                                }}
+                                placeholder="Bank transaction ID or UTR"
+                                className="mt-1"
+                            />
                         </div>
 
                         <div>
@@ -494,7 +530,7 @@ export default function EarningFormDialog({
                                             or click to browse
                                         </p>
                                         <p className="text-xs text-gray-400 mt-2">
-                                            PDF, PNG, JPG, or HEIC
+                                            PDF, PNG, JPG
                                         </p>
                                     </>
                                 )}

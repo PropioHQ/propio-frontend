@@ -5,6 +5,10 @@ export const COUNTRY_STATES_KEY = "country-states-master";
 // user
 export const USER_PROFILE_KEY = "user-profile";
 
+// organizations
+export const ORGANIZATIONS_KEY = "organizations-list";
+export const ORGANIZATION_KEY = "organization-details";
+
 // property
 export const PROPERTY_COUNT_KEY = "property-count";
 export const PROPERTIES_KEY = "properties-list";

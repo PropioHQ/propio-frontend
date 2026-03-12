@@ -14,7 +14,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, handleNumberInput } from "@/lib/utils";
 import { EXPENSE_KEY } from "@/querykeys";
 import AttachmentService from "@/services/attachment.service";
 import ExpenseService from "@/services/expense.service";
@@ -291,76 +291,53 @@ export default function ExpenseFormDialog({
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                        <div className="flex flex-col">
-                            <Label>Record date *</Label>
-                            <Popover modal>
-                                <PopoverTrigger className="mt-2" asChild>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        id="date-picker-simple"
-                                        className="justify-start font-normal hover:bg-background"
+                        <div className="grid grid-cols-2 gap-4 items-baseline">
+                            <div className="flex flex-col">
+                                <Label>Record date *</Label>
+                                <Popover modal>
+                                    <PopoverTrigger className="mt-2" asChild>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            id="date-picker-simple"
+                                            className="justify-start font-normal hover:bg-background"
+                                        >
+                                            {formData.recordDate ? (
+                                                dayjs(
+                                                    formData.recordDate,
+                                                ).format("MMM D, YYYY")
+                                            ) : (
+                                                <span>Pick a date</span>
+                                            )}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                        className="w-52 p-0"
+                                        align="start"
                                     >
-                                        {formData.recordDate ? (
-                                            dayjs(formData.recordDate).format(
-                                                "MMM D, YYYY",
-                                            )
-                                        ) : (
-                                            <span>Pick a date</span>
-                                        )}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                    className="w-52 p-0"
-                                    align="start"
-                                >
-                                    <Calendar
-                                        mode="single"
-                                        className="w-full rounded-lg"
-                                        selected={formData.recordDate}
-                                        onSelect={(d) =>
-                                            setFormData({
-                                                ...formData,
-                                                recordDate: d,
-                                            })
-                                        }
-                                        defaultMonth={
-                                            formData.recordDate || new Date()
-                                        }
-                                    />
-                                </PopoverContent>
-                            </Popover>
-                            {isRecordDateYearOld ? (
-                                <p className="bg-yellow-50 text-yellow-900 mt-2 p-1 font-medium rounded-sm text-xs w-fit">
-                                    Note: Record date is older than current year
-                                </p>
-                            ) : null}
-                        </div>
-
-                        <div>
-                            <Label>Amount *</Label>
-                            <Input
-                                type="text"
-                                required
-                                min={0}
-                                value={formData.amount}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    const amount =
-                                        isNaN(v) || !v
-                                            ? ""
-                                            : Math.abs(v).toString();
-
-                                    setFormData({
-                                        ...formData,
-                                        amount,
-                                    });
-                                }}
-                                className="mt-1"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
+                                        <Calendar
+                                            mode="single"
+                                            className="w-full rounded-lg"
+                                            selected={formData.recordDate}
+                                            onSelect={(d) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    recordDate: d,
+                                                })
+                                            }
+                                            defaultMonth={
+                                                formData.recordDate ||
+                                                new Date()
+                                            }
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                                {isRecordDateYearOld ? (
+                                    <p className="bg-yellow-50 text-yellow-900 mt-2 p-1 rounded-sm text-xs w-fit">
+                                        Record date is older than current year
+                                    </p>
+                                ) : null}
+                            </div>
                             <div>
                                 <Label>Category *</Label>
                                 <Select
@@ -387,6 +364,25 @@ export default function ExpenseFormDialog({
                                         )}
                                     </SelectContent>
                                 </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label>Amount *</Label>
+                                <Input
+                                    type="text"
+                                    required
+                                    min={0}
+                                    value={formData.amount}
+                                    onChange={(e) => {
+                                        setFormData({
+                                            ...formData,
+                                            amount: handleNumberInput(e),
+                                        });
+                                    }}
+                                    className="mt-1"
+                                />
                             </div>
                             <div>
                                 <Label>Payment mode *</Label>
@@ -487,7 +483,7 @@ export default function ExpenseFormDialog({
                                             or click to browse
                                         </p>
                                         <p className="text-xs text-gray-400 mt-2">
-                                            PDF, PNG, JPG, or HEIC
+                                            PDF, PNG, JPG
                                         </p>
                                     </>
                                 )}
