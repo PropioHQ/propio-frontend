@@ -73,7 +73,7 @@ export default function OrganizationForm({
         name = name.trim();
         city = city.trim();
 
-        if (!name || !city || !state || !country) {
+        if (!name || !street || !city || !state || !country) {
             toast.error("All fields are required");
             return;
         }
@@ -116,7 +116,7 @@ export default function OrganizationForm({
                     state,
                     country,
                 );
-                toast.success("Organization details added successfully!");
+                toast.success("Organization created successfully!");
             }
 
             // Refresh organizations entries
@@ -278,7 +278,7 @@ export default function OrganizationForm({
                     />
                 </div>
                 <div>
-                    <Label htmlFor="street">Street</Label>
+                    <Label htmlFor="street">Street *</Label>
                     <Input
                         id="street"
                         data-testid="street-input"
