@@ -46,7 +46,11 @@ export function Header() {
                         </nav>
 
                         <div className="flex items-center gap-2 sm:gap-3">
-                            <Link to="/signin" className="hidden sm:block">
+                            <Link
+                                to="/signin"
+                                className="hidden sm:block"
+                                prefetch="viewport"
+                            >
                                 <Button
                                     variant="ghost"
                                     className="text-sm rounded-xl"
@@ -54,7 +58,11 @@ export function Header() {
                                     Sign In
                                 </Button>
                             </Link>
-                            <Link to="/signup" className="hidden sm:block">
+                            <Link
+                                to="/signup"
+                                className="hidden sm:block"
+                                prefetch="viewport"
+                            >
                                 <Button
                                     variant="default"
                                     className="text-sm rounded-xl"
@@ -115,6 +123,7 @@ export function Header() {
                                 <div className="flex flex-col gap-2 pt-2">
                                     <Link
                                         to="/signin"
+                                        prefetch="viewport"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         <Button
@@ -126,6 +135,7 @@ export function Header() {
                                     </Link>
                                     <Link
                                         to="/signup"
+                                        prefetch="viewport"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-slate-900/20">

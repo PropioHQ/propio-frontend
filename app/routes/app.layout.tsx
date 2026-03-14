@@ -1,8 +1,9 @@
 import ScreenLoader from "@/components/screenloader";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth.context";
-import { cn } from "@/lib/utils";
-import { PROPERTY_COUNT_KEY } from "@/querykeys";
+import { cn, getOrganizationId, setOrganizationId } from "@/lib/utils";
+import { ORGANIZATIONS_KEY, PROPERTY_COUNT_KEY } from "@/querykeys";
+import OrganizationService from "@/services/organization.service";
 import PropertyService from "@/services/property.service";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -13,6 +14,7 @@ import {
     DollarSign,
     FileText,
     Home,
+    Hotel,
     LogOut,
     Receipt,
     Wallet,
@@ -43,8 +45,13 @@ const NavItems = [
         label: "Expenses",
     },
     {
-        path: "/app/properties",
+        path: "/app/units",
         icon: Building2,
+        label: "Units",
+    },
+    {
+        path: "/app/properties",
+        icon: Hotel,
         label: "Properties",
     },
     {
@@ -67,16 +74,34 @@ export default function AppLayout() {
     const [collapsed, setCollapsed] = useState(false);
     const [initialized, setInitialized] = useState(false);
 
+    const organizationId = useMemo(() => {
+        return getOrganizationId();
+    }, []);
+
     const isOnboardingPage = useMemo(
         () => location.pathname.includes("/app/onboarding"),
         [location.pathname],
     );
 
-    const { data: propertyCount, isLoading } = useQuery({
-        queryKey: [PROPERTY_COUNT_KEY],
-        queryFn: PropertyService.getPropertyCount,
-        staleTime: Infinity,
-    });
+    const { data: organizations, isLoading: isOrganizationsLoading } = useQuery(
+        {
+            queryKey: [ORGANIZATIONS_KEY],
+            queryFn: OrganizationService.getOrganizations,
+        },
+    );
+
+    const { data: propertyCount, isLoading: isPropertyCountLoading } = useQuery(
+        {
+            queryKey: [PROPERTY_COUNT_KEY],
+            queryFn: PropertyService.getPropertyCount,
+            staleTime: Infinity,
+        },
+    );
+
+    const isLoading = useMemo(
+        () => isOrganizationsLoading || isPropertyCountLoading,
+        [isOrganizationsLoading, isPropertyCountLoading],
+    );
 
     const handleLogout = async () => {
         logout();
@@ -97,6 +122,12 @@ export default function AppLayout() {
 
         if (!isOnboardingPage && propertyCount === 0) {
             navigate("/app/onboarding", { replace: true });
+        }
+
+        // If organization is not selected
+        // Select the first one
+        if (!organizationId) {
+            setOrganizationId(organizations[0]._id);
         }
 
         setInitialized(true);
@@ -158,7 +189,7 @@ export default function AppLayout() {
                                         key={item.path}
                                         data-testid={`nav-${item.label.toLowerCase()}`}
                                         to={item.path}
-                                        prefetch="intent"
+                                        prefetch="viewport"
                                         className={cn(
                                             "flex flex-row items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-transform",
                                             isActive

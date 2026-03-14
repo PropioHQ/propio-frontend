@@ -15,9 +15,10 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { cn, handleNumberInput } from "@/lib/utils";
-import { BOOKING_KEY, PROPERTY_KEY } from "@/querykeys";
+import { BOOKING_KEY, PROPERTY_UNITS_KEY } from "@/querykeys";
 import AttachmentService from "@/services/attachment.service";
 import BookingService from "@/services/booking.service";
+import PropertyService from "@/services/property.service";
 import { BookingPaymentMode, BookingSource } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -27,7 +28,6 @@ import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import PropertyService from "@/services/property.service";
 
 const FILE_SIZE_MB = 5;
 
@@ -49,6 +49,7 @@ export default function BookingFormDialog({
         checkIn: new Date(),
         checkOut: dayjs().add(1, "day").toDate(),
         ratePerNight: "",
+        unitId: "",
         amount: "",
         bookingSource: BookingSource.DIRECT,
         guestName: "",
@@ -67,10 +68,10 @@ export default function BookingFormDialog({
         staleTime: 0,
     });
 
-    const { data: property } = useQuery({
-        queryKey: [PROPERTY_KEY, propertyId],
-        queryFn: () => PropertyService.getProperty(propertyId),
-        enabled: Boolean(!bookingId && propertyId),
+    const { data: propertyUnits = [] } = useQuery({
+        queryKey: [PROPERTY_UNITS_KEY, propertyId],
+        queryFn: () => PropertyService.getPropertyUnits(propertyId),
+        enabled: Boolean(propertyId),
     });
 
     const onDrop = async (acceptedFiles) => {
@@ -137,6 +138,7 @@ export default function BookingFormDialog({
             checkIn,
             checkOut,
             ratePerNight,
+            unitId,
             amount,
             bookingSource,
             guestName,
@@ -147,6 +149,7 @@ export default function BookingFormDialog({
             checkIn: Date;
             checkOut: Date;
             ratePerNight: string | number;
+            unitId: string;
             amount: string | number;
             bookingSource: BookingSource;
             guestName: string;
@@ -159,6 +162,7 @@ export default function BookingFormDialog({
             checkIn,
             checkOut,
             ratePerNight,
+            unitId,
             amount,
             bookingSource,
             guestName?.trim(),
@@ -203,6 +207,7 @@ export default function BookingFormDialog({
                 await BookingService.updateBooking(
                     bookingId,
                     propertyId,
+                    unitId,
                     guestName,
                     guestCount,
                     checkIn,
@@ -217,6 +222,7 @@ export default function BookingFormDialog({
             } else {
                 await BookingService.addBooking(
                     propertyId,
+                    unitId,
                     guestName,
                     guestCount,
                     checkIn,
@@ -320,13 +326,20 @@ export default function BookingFormDialog({
     }, [bookingNights, formData.ratePerNight]);
 
     useEffect(() => {
-        if (property && !formData.ratePerNight) {
+        if (
+            propertyUnits?.length &&
+            formData.unitId &&
+            !formData.ratePerNight
+        ) {
+            const { ratePerNight } = propertyUnits.find(
+                (p) => p._id === formData.unitId,
+            );
             setFormData({
                 ...formData,
-                ratePerNight: property.ratePerNight || "",
+                ratePerNight: ratePerNight || "",
             });
         }
-    }, [property]);
+    }, [propertyUnits, formData.unitId]);
 
     useEffect(() => {
         const data = booking || prefill;
@@ -336,6 +349,7 @@ export default function BookingFormDialog({
                 checkIn: new Date(data.checkIn),
                 checkOut: new Date(data.checkOut),
                 ratePerNight: data.ratePerNight,
+                unitId: data.unitId,
                 amount: data.amount,
                 bookingSource: data.bookingSource,
                 guestName: data.guestName,
@@ -520,6 +534,31 @@ export default function BookingFormDialog({
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
+                                <Label>Unit *</Label>
+                                <Select
+                                    key={formData.unitId}
+                                    value={formData.unitId}
+                                    onValueChange={(value) =>
+                                        setFormData({
+                                            ...formData,
+                                            unitId: value,
+                                        })
+                                    }
+                                    required
+                                >
+                                    <SelectTrigger className="mt-1">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {propertyUnits?.map(({ _id, name }) => (
+                                            <SelectItem key={_id} value={_id}>
+                                                {name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
                                 <Label>Room rate *</Label>
                                 <Input
                                     type="text"
@@ -538,22 +577,21 @@ export default function BookingFormDialog({
                                     Inclusive of taxes
                                 </span>
                             </div>
-                            <div>
-                                <Label>Amount *</Label>
-                                <Input
-                                    type="text"
-                                    required
-                                    min={0}
-                                    value={Number(
-                                        formData.amount,
-                                    ).toLocaleString()}
-                                    className="mt-1"
-                                    disabled
-                                />
-                                <span className="text-xs text-gray-400">
-                                    Rate per night x {bookingNights} night(s)
-                                </span>
-                            </div>
+                        </div>
+
+                        <div>
+                            <Label>Amount *</Label>
+                            <Input
+                                type="text"
+                                required
+                                min={0}
+                                value={Number(formData.amount).toLocaleString()}
+                                className="mt-1"
+                                disabled
+                            />
+                            <span className="text-xs text-gray-400">
+                                Rate per night x {bookingNights} night(s)
+                            </span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

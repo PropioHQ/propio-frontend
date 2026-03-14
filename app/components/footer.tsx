@@ -64,6 +64,7 @@ export function Footer() {
                             </a>
                             <Link
                                 to="/signin"
+                                prefetch="intent"
                                 className="block text-slate-400 hover:text-white transition-colors duration-200 text-sm"
                             >
                                 Sign In

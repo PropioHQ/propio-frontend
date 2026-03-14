@@ -346,7 +346,11 @@ export default function LandingPage() {
                             transition={{ duration: 0.8, delay: 0.6 }}
                             className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center px-4"
                         >
-                            <Link to="/signup" className="w-full sm:w-auto">
+                            <Link
+                                to="/signup"
+                                className="w-full sm:w-auto"
+                                prefetch="viewport"
+                            >
                                 <Button
                                     size="lg"
                                     variant="default"
@@ -963,7 +967,7 @@ export default function LandingPage() {
                                         ))}
                                     </div>
 
-                                    <Link to="/signup">
+                                    <Link to="/signup" prefetch="viewport">
                                         <Button
                                             className={cn(
                                                 "w-full rounded-xl py-4 sm:py-5 text-sm font-medium transition-all duration-300",
@@ -1083,7 +1087,7 @@ export default function LandingPage() {
                             transition={{ duration: 0.6, delay: 0.3 }}
                             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                         >
-                            <Link to="/signup">
+                            <Link to="/signup" prefetch="viewport">
                                 <Button
                                     size="lg"
                                     variant="default"

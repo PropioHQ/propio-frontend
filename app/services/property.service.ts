@@ -1,5 +1,4 @@
 import API from "@/lib/api";
-import type { PropertyType } from "@/types";
 
 const PropertyService = {
     getProperty: async (propertyId: string) => {
@@ -10,6 +9,25 @@ const PropertyService = {
     },
     getProperties: async () => {
         return await API.get("/api/v1/property/all");
+    },
+    getPropertyUnit: async (unitId: string, propertyId: string) => {
+        const params = new URLSearchParams();
+
+        params.append("uid", unitId);
+        params.append("pid", propertyId);
+
+        const queryStr = params.toString();
+
+        return await API.get(`/api/v1/property/unit?${queryStr}`);
+    },
+    getPropertyUnits: async (propertyId: string) => {
+        const params = new URLSearchParams();
+
+        params.append("pid", propertyId);
+
+        const queryStr = params.toString();
+
+        return await API.get(`/api/v1/property/all/unit?${queryStr}`);
     },
     getMonthlyReport: async (
         propertyIds: string[],
@@ -37,7 +55,7 @@ const PropertyService = {
         state: string,
         country: string,
         role: string,
-        type: PropertyType,
+        type: string,
     ) => {
         return await API.post("/api/v1/property", {
             name,
@@ -55,9 +73,7 @@ const PropertyService = {
         state: string,
         country: string,
         role: string,
-        type: PropertyType,
-        maxOccupancy: number,
-        ratePerNight: number,
+        type: string,
     ) => {
         return await API.put("/api/v1/property", {
             propertyId,
@@ -67,8 +83,53 @@ const PropertyService = {
             country,
             role,
             type,
+        });
+    },
+    addPropertyUnit: async (
+        propertyId: string,
+        name: string,
+        type: string,
+        maxOccupancy: number,
+        ratePerNight: number,
+        note: string,
+    ) => {
+        return await API.post("/api/v1/property/unit", {
+            propertyId,
+            name,
+            type,
             maxOccupancy,
             ratePerNight,
+            note,
+        });
+    },
+    updatePropertyUnit: async (
+        propertyId: string,
+        unitId: string,
+        name: string,
+        type: string,
+        maxOccupancy: number,
+        ratePerNight: number,
+        note: string,
+    ) => {
+        return await API.put("/api/v1/property/unit", {
+            propertyId,
+            unitId,
+            name,
+            type,
+            maxOccupancy,
+            ratePerNight,
+            note,
+        });
+    },
+    updatePropertyUnitStatus: async (
+        propertyId: string,
+        unitId: string,
+        flag: boolean,
+    ) => {
+        return await API.put("/api/v1/property/unit/status", {
+            unitId,
+            propertyId,
+            flag,
         });
     },
 };

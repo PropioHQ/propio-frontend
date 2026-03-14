@@ -55,20 +55,6 @@ export enum ExpenseCategory {
     OTHERS = "Others",
 }
 
-export enum PropertyType {
-    APARTMENT = "Apartment",
-    VILLA = "Villa",
-    GLAMPING = "Glamping",
-    INDEPENDENT_HOUSE = "Independent House",
-    PRIVATE_ROOM = "Private Room",
-    SHARED_ROOM = "Shared Room",
-    HOTEL = "Hotel",
-    GUESTHOUSE = "Guesthouse",
-    HOMESTAY = "Homestay",
-    FARMSTAY = "Farmstay",
-    OTHER = "Other",
-}
-
 export enum AgentTaskStatus {
     PROCESSING = "PROCESSING",
     COMPLETED = "COMPLETED",

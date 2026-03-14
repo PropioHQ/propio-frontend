@@ -81,6 +81,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 />
                 <meta name="apple-mobile-web-app-title" content="Propio" />
                 <link rel="manifest" href="/site.webmanifest" />
+
+                <link
+                    rel="preload"
+                    href="/assets/logo-x.png"
+                    as="image"
+                    type="image/png"
+                />
+                <link
+                    rel="preload"
+                    href="/assets/logo-light.png"
+                    as="image"
+                    type="image/png"
+                />
+                <link
+                    rel="preload"
+                    href="/assets/logo-dark.png"
+                    as="image"
+                    type="image/png"
+                />
+
                 <Meta />
                 <Links />
             </head>

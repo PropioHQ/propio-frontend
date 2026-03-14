@@ -1,4 +1,4 @@
-import { getAuthToken } from "@/lib/utils";
+import { getAuthToken, getOrganizationId } from "@/lib/utils";
 
 const baseURL = process.env.VITE_API_BASE_URL;
 
@@ -21,6 +21,8 @@ const request = async (
     if (token) {
         headers["Authorization"] = `Bearer ${token}`;
     }
+
+    headers["x-organization-id"] = getOrganizationId();
 
     // Set Content-Type based on data
     if (data instanceof FormData) {

@@ -1,6 +1,8 @@
 // constants
 export const COUNTRIES_KEY = "countries-master";
 export const COUNTRY_STATES_KEY = "country-states-master";
+export const PROPERTY_TYPES_KEY = "property-types";
+export const UNIT_TYPES_KEY = "unit-types";
 
 // user
 export const USER_PROFILE_KEY = "user-profile";
@@ -13,6 +15,8 @@ export const ORGANIZATION_KEY = "organization-details";
 export const PROPERTY_COUNT_KEY = "property-count";
 export const PROPERTIES_KEY = "properties-list";
 export const PROPERTY_KEY = "property-details";
+export const PROPERTY_UNITS_KEY = "property-unit-list";
+export const PROPERTY_UNIT_KEY = "property-unit-details";
 export const PROPERTIES_REPORTS = "properties-reports";
 
 // booking

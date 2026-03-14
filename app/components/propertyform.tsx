@@ -7,17 +7,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { handleNumberInput } from "@/lib/utils";
 import {
     COUNTRIES_KEY,
     COUNTRY_STATES_KEY,
     PROPERTIES_KEY,
     PROPERTY_COUNT_KEY,
     PROPERTY_KEY,
+    PROPERTY_TYPES_KEY,
 } from "@/querykeys";
 import ConstantsService from "@/services/constants.service";
 import PropertyService from "@/services/property.service";
-import { PropertyType, UserRoles } from "@/types";
+import { UserRoles } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -31,7 +31,6 @@ export default function PropertyForm({
     onSuccess,
     propertyId = null,
     prefill = null,
-    optionalFields = false,
 }) {
     const queryClient = useQueryClient();
 
@@ -42,9 +41,7 @@ export default function PropertyForm({
         state: "",
         country: "",
         role: UserRoles.OWNER,
-        type: PropertyType.APARTMENT,
-        maxOccupancy: "",
-        ratePerNight: "",
+        type: "",
     });
 
     const { data: countries = [] } = useQuery({
@@ -61,17 +58,14 @@ export default function PropertyForm({
         staleTime: Infinity,
     });
 
+    const { data: propertyTypes = [] } = useQuery({
+        queryKey: [PROPERTY_TYPES_KEY],
+        queryFn: ConstantsService.getPropertyTypes,
+        staleTime: Infinity,
+    });
+
     const handleSubmit = async () => {
-        let {
-            name,
-            city,
-            state,
-            country,
-            role,
-            type,
-            maxOccupancy,
-            ratePerNight,
-        } = propertyData;
+        let { name, city, state, country, role, type } = propertyData;
         name = name.trim();
         city = city.trim();
 
@@ -98,8 +92,6 @@ export default function PropertyForm({
                     country,
                     role,
                     type,
-                    Number(maxOccupancy || 0),
-                    Number(ratePerNight || 0),
                 );
                 toast.success("Property details updated successfully!");
                 queryClient.invalidateQueries({
@@ -153,9 +145,7 @@ export default function PropertyForm({
                 state: prefill.state || "",
                 country: prefill.country || "",
                 role: (prefill.role || "") as UserRoles,
-                type: (prefill.type || "") as PropertyType,
-                maxOccupancy: prefill.maxOccupancy || "",
-                ratePerNight: prefill.ratePerNight || "",
+                type: prefill.type || "",
             });
         }
     }, [prefill]);
@@ -318,7 +308,7 @@ export default function PropertyForm({
                     onValueChange={(value) =>
                         setPropertyData({
                             ...propertyData,
-                            type: value as PropertyType,
+                            type: value,
                         })
                     }
                     required
@@ -333,7 +323,7 @@ export default function PropertyForm({
                         sideOffset={4}
                         className="max-h-64 overflow-y-auto"
                     >
-                        {Object.values(PropertyType).map((type) => (
+                        {propertyTypes.map((type) => (
                             <SelectItem key={type} value={type}>
                                 {type}
                             </SelectItem>
@@ -341,43 +331,6 @@ export default function PropertyForm({
                     </SelectContent>
                 </Select>
             </div>
-
-            {optionalFields ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <Label htmlFor="max-occupancy">Max occupancy</Label>
-                        <Input
-                            name="max-occupancy"
-                            type="text"
-                            value={propertyData.maxOccupancy}
-                            placeholder="2 Guest(s)"
-                            onChange={(e) => {
-                                setPropertyData({
-                                    ...propertyData,
-                                    maxOccupancy: handleNumberInput(e, false),
-                                });
-                            }}
-                            className="mt-1"
-                        />
-                    </div>
-                    <div>
-                        <Label htmlFor="rate-per-night">Rate per night</Label>
-                        <Input
-                            name="rate-per-night"
-                            type="text"
-                            value={propertyData.ratePerNight}
-                            placeholder="3500"
-                            onChange={(e) => {
-                                setPropertyData({
-                                    ...propertyData,
-                                    ratePerNight: handleNumberInput(e),
-                                });
-                            }}
-                            className="mt-1"
-                        />
-                    </div>
-                </div>
-            ) : null}
 
             <div className="flex gap-3 pt-4">
                 <Button

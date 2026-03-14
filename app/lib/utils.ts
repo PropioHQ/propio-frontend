@@ -54,12 +54,20 @@ export function setAuthToken(token: string) {
     window.localStorage.setItem("x-a-token", token);
 }
 
-export function getAuthToken() {
+export function getAuthToken(): string {
     return window.localStorage.getItem("x-a-token") || "";
 }
 
 export function removeAuthToken() {
     window.localStorage.removeItem("x-a-token");
+}
+
+export function setOrganizationId(organizationId: string) {
+    window.sessionStorage.setItem("x-organization-id", organizationId);
+}
+
+export function getOrganizationId(): string {
+    return window.sessionStorage.getItem("x-organization-id") || "";
 }
 
 export function isValidEmail(email: string) {

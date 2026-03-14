@@ -20,6 +20,7 @@ const BookingService = {
     },
     addBooking: async (
         propertyId: string,
+        unitId: string,
         guestName: string,
         guestCount: number,
         checkIn: Date,
@@ -32,6 +33,7 @@ const BookingService = {
     ) => {
         return await API.post("/api/v1/booking", {
             propertyId,
+            unitId,
             guestName,
             guestCount,
             checkIn,
@@ -46,6 +48,7 @@ const BookingService = {
     updateBooking: async (
         bookingId: string,
         propertyId: string,
+        unitId: string,
         guestName: string,
         guestCount: number,
         checkIn: Date,
@@ -59,6 +62,7 @@ const BookingService = {
         return await API.put("/api/v1/booking", {
             bookingId,
             propertyId,
+            unitId,
             guestName,
             guestCount,
             checkIn,
@@ -77,6 +81,7 @@ const BookingService = {
     },
     getAvailabilityByMonth: async (
         propertyId: string,
+        unitId: string,
         month: number,
         year: number,
     ) => {
@@ -85,6 +90,7 @@ const BookingService = {
         params.append("m", month.toString());
         params.append("y", year.toString());
         params.append("pid", propertyId);
+        params.append("uid", unitId);
 
         const queryStr = params.toString();
 
@@ -92,6 +98,7 @@ const BookingService = {
     },
     checkAvailability: async (
         propertyId: string,
+        unitId: string,
         checkIn: Date,
         checkOut: Date,
     ) => {
@@ -100,6 +107,7 @@ const BookingService = {
         params.append("checkIn", checkIn.toISOString());
         params.append("checkOut", checkOut.toISOString());
         params.append("pid", propertyId);
+        params.append("uid", unitId);
 
         const queryStr = params.toString();
 

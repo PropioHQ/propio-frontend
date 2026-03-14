@@ -297,43 +297,6 @@ export default function OrganizationForm({
                 </div>
             </div>
 
-            {/* {optionalFields ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <Label htmlFor="max-occupancy">Max occupancy</Label>
-                        <Input
-                            name="max-occupancy"
-                            type="text"
-                            value={organizationData.maxOccupancy}
-                            placeholder="2 Guest(s)"
-                            onChange={(e) => {
-                                setOrganizationData({
-                                    ...organizationData,
-                                    maxOccupancy: handleNumberInput(e, false),
-                                });
-                            }}
-                            className="mt-1"
-                        />
-                    </div>
-                    <div>
-                        <Label htmlFor="rate-per-night">Rate per night</Label>
-                        <Input
-                            name="rate-per-night"
-                            type="text"
-                            value={organizationData.ratePerNight}
-                            placeholder="3500"
-                            onChange={(e) => {
-                                setOrganizationData({
-                                    ...organizationData,
-                                    ratePerNight: handleNumberInput(e),
-                                });
-                            }}
-                            className="mt-1"
-                        />
-                    </div>
-                </div>
-            ) : null} */}
-
             <div className="pt-4">
                 <Button
                     data-testid="save-organization-button"

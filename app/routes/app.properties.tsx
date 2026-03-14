@@ -59,7 +59,7 @@ export default function Properties() {
                     </h1>
                 </div>
                 <Button
-                    data-testid="add-expense-button"
+                    data-testid="add-property-button"
                     onClick={() => {
                         if (properties.length) {
                             // Prefill last property details
@@ -97,9 +97,6 @@ export default function Properties() {
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                                 Location
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                Room Rate
-                            </th>
                             <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
                                 Status
                             </th>
@@ -133,11 +130,6 @@ export default function Properties() {
                                     <span>
                                         {property.city}, {property.state}
                                     </span>
-                                </td>
-                                <td className="px-4 py-4 text-sm text-gray-700">
-                                    {property.ratePerNight
-                                        ? `₹${property.ratePerNight}`
-                                        : ""}
                                 </td>
                                 <td className="px-4 py-4 text-center text-gray-700">
                                     {property.isActive ? (
@@ -265,7 +257,7 @@ export default function Properties() {
                                     }}
                                     variant="ghost"
                                     size="icon"
-                                    aria-label="Edit expense"
+                                    aria-label="Edit property"
                                 >
                                     <EllipsisVertical className="h-4 w-4 text-gray-700" />
                                 </Button>
@@ -291,7 +283,6 @@ export default function Properties() {
                             onBack={() => setIsDialogOpen(false)}
                             propertyId={selectedProperty?._id}
                             prefill={selectedProperty}
-                            optionalFields
                         />
                     </DialogContent>
                 </Dialog>

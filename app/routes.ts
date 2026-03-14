@@ -24,6 +24,7 @@ export default [
         route("/app/earnings", "routes/app.earnings.tsx"),
         route("/app/expenses", "routes/app.expenses.tsx"),
         route("/app/properties", "routes/app.properties.tsx"),
+        route("/app/units", "routes/app.units.tsx"),
         route("/app/reports", "routes/app.reports.tsx"),
         route("/app/vault", "routes/app.vault.tsx"),
     ]),
